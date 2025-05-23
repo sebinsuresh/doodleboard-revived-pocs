@@ -10,5 +10,60 @@ const palette = [
   '#3C3C5F',
   '#96D2F0',
   '#A07DA0',
-  '#000000',
+  // '#000000',
+  '#FFFFFF',
 ];
+
+const testDrawingUncompressed =
+  'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb88888bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb800000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0055111100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0555111100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb05555088081111000000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0011110008000000008118000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0111111000001111000811100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010000010111111110081180bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010001010000111111001000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00000111111000110018010bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb000000158551100011011081100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb011000011188110101101100100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0501000011111100011101100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb05100400011111110101100100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010003330001100101111101100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010014344000000000100100110bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0100134444400010000100101110bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0000b000044400000000010001000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0144404044440001010000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0100000040000344000000b0bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0157704045770333000100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0144404044440334000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00004440000443100000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb14444444444444000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb11433344444440000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1443344444430000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1444442444430000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb142224444300000100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb144444443300111111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1144433330111331111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb100333301113333111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00333111111333111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb11011113311130000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb13111133311100088880bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1131111333110000088800bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1331111333100000000880bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1331111000000000000880bbbbbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbb1311111000000000000800bbbbbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbb13111100000000000008000bbbbbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbb11100000000000000008880bbbbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000008880bbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbbbbbb0010000000000000888080bbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbbb00000023300000008800808bbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbbbb000000232000000000088080000080111b000bbbbbbbbbbbbbbbbbbbbbbbbbbb00000033200000000008088888800044400bbbbbbbbbbbbbbbbbbbbbbbbbbbb000000030000000000000000080001444000bbbbbbbbbbbbbbbbbbbbbbbbbbb00000000000000000000000000000114440014bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000000144111114bbbbbbbbbbbbbbbbbbbbbbbbbb00000000000000000000000000000144144444bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000001444114444bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000001444411111bbbb';
+
+// document on load
+const NUM_ROWS_COLS = 64;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('doodle');
+  const cellSide = ~~(canvas.width / NUM_ROWS_COLS);
+  /** @type {CanvasRenderingContext2D} */
+  const ctx = canvas.getContext('2d');
+
+  // bg
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // cells
+  renderUncompressed(ctx, cellSide);
+
+  const compressed = getCompressedV1(testDrawingUncompressed);
+  console.log(testDrawingUncompressed, testDrawingUncompressed.length);
+  console.log(compressed, compressed.length);
+});
+
+function renderUncompressed(ctx, cellSide) {
+  ctx.strokeStyle = null;
+  for (let i = 0; i < testDrawingUncompressed.length; i++) {
+    const row = ~~(i % NUM_ROWS_COLS);
+    const col = ~~(i / NUM_ROWS_COLS);
+    ctx.fillStyle = palette[parseInt(`0x${testDrawingUncompressed.charAt(i)}`)];
+    ctx.fillRect(row * cellSide, col * cellSide, cellSide, cellSide);
+  }
+}
+
+/** @param {string} uncompressedV0String */
+function getCompressedV1(uncompressedV0String) {
+  if (uncompressedV0String.length !== 64 * 64) {
+    throw new Error('Uncompressed string must be 64x64');
+  }
+
+  const compressed = uncompressedV0String
+    .split(/([0-9abcdef]{4})/g)
+    .filter(Boolean)
+    .map((s) => String.fromCharCode(`0x${s}`))
+    .join('');
+
+  return compressed;
+}
+
+/** @param {string} compressedV1String */
+function decompress(compressedV1String) {
+  throw new Error('Not implemented yet');
+}
