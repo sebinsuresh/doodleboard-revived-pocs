@@ -5,5 +5,12 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "workbench.colorCustomizations": {
+        // "[Default Dark+]": {
+        //     // make it easier to see selection repeats:
+        //     "editor.selectionBackground": "#0080ff",
+        //     "editor.selectionHighlightBackground": "#5788b9",
+        // },
     }
 }
