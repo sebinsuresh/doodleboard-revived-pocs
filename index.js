@@ -57,8 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('v3', compressedV3.length, compressedV3);
   const compressedV3TrimmedThenV1 = compressV1(compressedV3.substring(0, 4 * ~~(compressedV3.length / 4)));
   console.log('v3(trim)->v1', compressedV3TrimmedThenV1.length, compressedV3TrimmedThenV1);
-  const compressedV3ThenV1 = compressV1(compressedV3);
-  console.log('v3->v1', compressedV3ThenV1.length, compressedV3ThenV1);
+  // const compressedV3ThenV1 = compressV1(compressedV3);
+  // console.log('v3->v1', compressedV3ThenV1.length, compressedV3ThenV1);
 
   // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 4, 20));
   // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 5, -1));
@@ -80,17 +80,30 @@ function renderUncompressed(ctx, cellSide) {
   }
 }
 
+// TODO: Do i need to rewrite this? The last 4 hex will be problematic:
+// E.g. We won't know if a last '0x10' came from '0010' or '10'
+//
+// hexString: '1234 0010' -> compressV1: char(0x1234) char(0x10)
+// hexString: '1234 10'   -> compressV1: char(0x1234) char(0x10)
+//
+// 1. I could add a character at the beginning to indicate the total length of the source string.
+// 2. I could add 4 bits (one hex) to indicate which bits were present out of last 4 bits in source string.
+// so 1111 (f), 1110 (e), 1100 (c), or 1000 (8). Continuing example above:
+// compressV1: 0xc 0x1234 0x10 -> hexString: '1234 10'
+// compressV1: 0xe 0x1234 0x10 -> hexString: '1234 010'
+// compressV1: 0xf 0x1234 0x10 -> hexString: '1234 0010'
+// compressV1: 0x8 0x1234 0x10 -> invalid, since at least 2 bits must be active.
 /** @param {string} uncompressedHexString */
 function compressV1(uncompressedHexString) {
   if (!uncompressedHexString.length || uncompressedHexString.length % 4 !== 0) {
     throw new Error('Uncompressed string length must be a multiple of 4');
   }
 
-  const compressed = uncompressedHexString
-    .split(/([0-9abcdef]{4})/g)
-    .filter(Boolean)
-    .map((s) => String.fromCharCode(Number(`0x${s}`)))
-    .join('');
+  let compressed = '';
+  for (let i = 0; i < uncompressedHexString.length; i += 4) {
+    const hexValue = parseInt(uncompressedHexString.substring(i, i + 4), 16);
+    compressed += String.fromCharCode(hexValue);
+  }
 
   return compressed;
 }
@@ -150,7 +163,7 @@ function decompressV2(compressedV2String) {
     const currentChar = compressedV2String[i];
     const currentFour = compressedV2String.substring(i, i + 4);
     if (currentChar === rleCode) {
-      decompressed += currentFour[1].repeat(Number(`0x${currentFour.substring(2, 4)}`));
+      decompressed += currentFour[1].repeat(parseInt(currentFour.substring(2, 4), 16));
       i += 3;
     } else {
       decompressed += currentChar;
