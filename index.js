@@ -80,7 +80,14 @@ function renderUncompressed(ctx, cellSide) {
   }
 }
 
-/** @param {string} uncompressedHexString */
+/**
+ * Compresses given hex string by encoding each 4 hex digits to a single char.
+ *
+ * Adds prefix character with the number of hex digits in the last character in
+ * its last 2 bits.
+ *
+ * @param {string} uncompressedHexString
+ * */
 function compressV1(uncompressedHexString) {
   if (!uncompressedHexString.length) {
     return uncompressedHexString;
@@ -129,57 +136,83 @@ function decompressV1(compressedV1String) {
   return result;
 }
 
-/** @param {string} uncompressedDoodleString */
+/**
+ * Compress input doodle hex string via Run Length Encoding (RLE).
+ *
+ * Use {@link compressV1} to compress the result further.
+ *
+ * @param {string} uncompressedDoodleString
+ * */
 function compressV2(uncompressedDoodleString) {
-  // TODO: can I remove these restrictions on the string?
-  if (!uncompressedDoodleString || uncompressedDoodleString.length % 4 !== 0) {
-    throw new Error('Uncompressed string length must be a multiple of 4');
+  if (!uncompressedDoodleString.length) {
+    return uncompressedDoodleString;
   }
+
+  // TODO: can I remove this restriction on the string?
   if (uncompressedDoodleString.match(/[^0-9ab]/)) {
     throw new Error('Doodle strings can only contain 0-9, a, b palette indices.');
   }
 
-  const rleCode = 'c';
+  const RLE_CODE = 'c';
+  // Repeat count in output string starts at 5 and ends at max value.
+  // If repeat count === 0, that means 5 repeats.
+  // If repeat count === 1, 6 repeats.
+  // If repeat count === 255, 260 repeats.
+  const USE_REPEAT_AFTER = 5;
 
   let compressed = '';
-  for (let i = 0; i < uncompressedDoodleString.length - 4; i++) {
+  let i = 0;
+  while (i < uncompressedDoodleString.length - 4) {
     let repeatCount = 1;
     let currentChar = uncompressedDoodleString[i];
 
     while (
       uncompressedDoodleString[i + repeatCount] === currentChar &&
-      repeatCount < 255 &&
-      i + repeatCount < uncompressedDoodleString.length - 4
+      repeatCount < 256 + USE_REPEAT_AFTER &&
+      i + repeatCount < uncompressedDoodleString.length
     ) {
       repeatCount++;
     }
 
-    if (repeatCount > 4) {
-      compressed += `${rleCode}${currentChar}${repeatCount.toString(16).padStart(2, '0')}`;
-      i += repeatCount - 1;
+    if (repeatCount >= USE_REPEAT_AFTER) {
+      const adjustedRepeatHex = (repeatCount - USE_REPEAT_AFTER).toString(16).padStart(2, '0');
+      compressed += `${RLE_CODE}${currentChar}${adjustedRepeatHex}`;
+      i += repeatCount;
+    } else if (repeatCount > 1) {
+      // These two else cases can be a single else, but keeping it like this to be explicit.
+
+      compressed += uncompressedDoodleString[i].repeat(repeatCount);
+      i += repeatCount;
     } else {
-      compressed += `${uncompressedDoodleString.substring(i, i + 4)}`;
-      i += 3;
+      compressed += uncompressedDoodleString[i];
+      i++;
     }
   }
-  compressed += `${uncompressedDoodleString.substring(uncompressedDoodleString.length - 4)}`;
+  compressed += uncompressedDoodleString.substring(i, uncompressedDoodleString.length);
 
   return compressed;
 }
 
 /** @param {string} compressedV2String */
 function decompressV2(compressedV2String) {
-  const rleCode = 'c';
+  if (!compressedV2String.length) {
+    return compressedV2String;
+  }
+
+  const RLE_CODE = 'c';
+  const USE_REPEAT_AFTER = 5;
 
   let decompressed = '';
-  for (let i = 0; i < compressedV2String.length; i++) {
+  for (let i = 0; i < compressedV2String.length; ) {
     const currentChar = compressedV2String[i];
-    const currentFour = compressedV2String.substring(i, i + 4);
-    if (currentChar === rleCode) {
-      decompressed += currentFour[1].repeat(parseInt(currentFour.substring(2, 4), 16));
-      i += 3;
+
+    if (currentChar === RLE_CODE) {
+      const currentFour = compressedV2String.substring(i, i + 4);
+      decompressed += currentFour[1].repeat(parseInt(currentFour.substring(2, 4), 16) + USE_REPEAT_AFTER);
+      i += 4;
     } else {
       decompressed += currentChar;
+      i++;
     }
   }
 
@@ -188,8 +221,11 @@ function decompressV2(compressedV2String) {
 
 /** @param {string} uncompressedDoodleString */
 function compressV3(uncompressedDoodleString) {
+  if (!uncompressedDoodleString.length) {
+    return uncompressedDoodleString;
+  }
   // TODO: can I remove these restrictions on the string?
-  if (!uncompressedDoodleString || uncompressedDoodleString.length % 4 !== 0) {
+  if (uncompressedDoodleString.length % 4 !== 0) {
     throw new Error('Uncompressed string length must be a multiple of 4');
   }
   if (uncompressedDoodleString.match(/[^0-9ab]/)) {
