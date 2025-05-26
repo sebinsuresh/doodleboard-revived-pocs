@@ -44,19 +44,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const cellSide = ~~(canvas.width / NUM_ROWS_COLS);
   renderUncompressed(ctx, cellSide);
 
-  console.log('original', testDrawingUncompressed.length, testDrawingUncompressed);
-  const compressedV1 = compressV1(testDrawingUncompressed);
-  console.log('v1', compressedV1.length, compressedV1);
+  // console.log('original', testDrawingUncompressed.length, testDrawingUncompressed);
+  // const compressedV1 = compressV1(testDrawingUncompressed);
+  // console.log('v1', compressedV1.length, compressedV1);
 
-  const compressedV2 = compressV2(testDrawingUncompressed);
-  console.log('v2', compressedV2.length, compressedV2);
-  const compressedV2ThenV1 = compressV1(compressedV2);
-  console.log('v2->v1', compressedV2ThenV1.length, compressedV2ThenV1);
+  // const compressedV2 = compressV2(testDrawingUncompressed);
+  // console.log('v2', compressedV2.length, compressedV2);
+  // const compressedV2ThenV1 = compressV1(compressedV2);
+  // console.log('v2->v1', compressedV2ThenV1.length, compressedV2ThenV1);
 
-  const compressedV3 = compressV3(testDrawingUncompressed);
-  console.log('v3', compressedV3.length, compressedV3);
-  const compressedV3ThenV1 = compressV1(compressedV3);
-  console.log('v3->v1', compressedV3ThenV1.length, compressedV3ThenV1);
+  // const compressedV3 = compressV3(testDrawingUncompressed);
+  // console.log('v3', compressedV3.length, compressedV3);
+  // const compressedV3ThenV1 = compressV1(compressedV3);
+  // console.log('v3->v1', compressedV3ThenV1.length, compressedV3ThenV1);
 
   // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 4, 20));
   // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 5, -1));
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // console.log(getCountOfStringsOfLength(compressedV2, 6, -1));
   // console.log(getCountOfStringsOfLength(compressedV2, 7, -1));
 
-  // runTests();
+  runTests();
 });
 
 function renderUncompressed(ctx, cellSide) {
@@ -166,7 +166,7 @@ function compressV2(uncompressedDoodleString) {
 
     while (
       uncompressedDoodleString[i + repeatCount] === currentChar &&
-      repeatCount < 256 + USE_REPEAT_AFTER &&
+      repeatCount < 255 + USE_REPEAT_AFTER &&
       i + repeatCount < uncompressedDoodleString.length
     ) {
       repeatCount++;
@@ -421,18 +421,54 @@ function runTests() {
     ].forEach((testStr) => {
       if (testStr.length % 4 === 0) {
         tester.assertEqual(
-          `hex characters from compressing '${testStr}'`,
+          `hex characters from compressing multiple of 4 long '${testStr}'`,
           getHexChars(compressV1(testStr)),
-          testStr,
+          '0000' + testStr,
         );
       }
     });
-    tester.assertThrows('should throw for empty', () => getHexChars(compressV1('')));
-    [1, 3, 5, 13].forEach((len) => {
-      tester.assertThrows(`should throw for non-multiple of 4 length (${len})`, () =>
-        getHexChars(compressV1('1'.repeat(len))),
+    tester.assertEqual('should return empty for empty', getHexChars(compressV1('')), '');
+    ['0', '1'].forEach((testStr) => {
+      tester.assertEqual(
+        `should add non-zero prefix for 1-long string '${testStr}'`,
+        getHexChars(compressV1(testStr)),
+        '0001' + testStr.padStart(4, '0'),
       );
     });
+    ['00', '01', '11'].forEach((testStr) => {
+      tester.assertEqual(
+        `should add non-zero prefix for 2-long string '${testStr}'`,
+        getHexChars(compressV1(testStr)),
+        '0002' + testStr.padStart(4, '0'),
+      );
+    });
+    ['000', '001', '010', '110', '100', '111'].forEach((testStr) => {
+      tester.assertEqual(
+        `should add non-zero prefix for 2-long string '${testStr}'`,
+        getHexChars(compressV1(testStr)),
+        '0003' + testStr.padStart(4, '0'),
+      );
+    });
+    tester.assertEqual(
+      'should add non-zero prefix for 5-long string',
+      getHexChars(compressV1('1000' + '0')),
+      '0001' + '1000' + '0000',
+    );
+    tester.assertEqual(
+      'should add non-zero prefix for 5-long string',
+      getHexChars(compressV1('1000' + '1')),
+      '0001' + '1000' + '0001',
+    );
+    tester.assertEqual(
+      'should add non-zero prefix for 7-long string',
+      getHexChars(compressV1('1000' + '000')),
+      '0003' + '1000' + '0000',
+    );
+    tester.assertEqual(
+      'should add non-zero prefix for 7-long string',
+      getHexChars(compressV1('1000' + '100')),
+      '0003' + '1000' + '0100',
+    );
     tester.finish();
   }
 
@@ -469,7 +505,7 @@ function runTests() {
       `${compressV2.name} Tests`,
       // { showErrorsOnSuccess: true }
     );
-    const rleCode = 'c';
+    const RLE_CODE = 'c';
 
     // 4 chars
     tester.assertEqual('4 of the same', compressV2('1111'), '1111');
@@ -477,16 +513,16 @@ function runTests() {
     tester.assertEqual('4 different', compressV2('1234'), '1234');
 
     // 8 chars
-    tester.assertEqual('8 of same - should not use rle', compressV2('1111' + '1111'), `1111` + '1111');
+    tester.assertEqual('8 of same - should use rle', compressV2('1111' + '1111'), `${RLE_CODE}103`);
     tester.assertEqual(
       '8 of two different, 4 each - should not use rle',
       compressV2('1111' + '2222'),
       '1111' + '2222',
     );
     tester.assertEqual(
-      '8 of two different, 6-2 per - should not use rle',
+      '8 of two different, 6-2 per - should use rle for first',
       compressV2('1111' + '1122'),
-      '1111' + '1122',
+      `${RLE_CODE}10122`,
     );
     tester.assertEqual(
       '8 of all different - should not use rle',
@@ -495,11 +531,7 @@ function runTests() {
     );
 
     // 12 chars
-    tester.assertEqual(
-      '12 of same - should use RLE',
-      compressV2('1111' + '1111' + '1111'),
-      `${rleCode}108` + '1111',
-    );
+    tester.assertEqual('12 of same - should use RLE', compressV2('1111' + '1111' + '1111'), `${RLE_CODE}107`);
     tester.assertEqual(
       '12 of 3 different, 4 each - should not use rle',
       compressV2('1111' + '2222' + '3333'),
@@ -508,25 +540,66 @@ function runTests() {
     tester.assertEqual(
       '8 chars in middle - should use RLE',
       compressV2('1111' + '2222' + '2222' + '3333'),
-      '1111' + `${rleCode}208` + '3333',
+      '1111' + `${RLE_CODE}203` + '3333',
     );
 
+    // 16 chars
     tester.assertEqual(
-      '16 chars - 8 repeating in middle - some spill to last 4 - should use RLE for middle',
+      '16 chars - 8 repeating in middle - some spill to last 4 - should use RLE for all repeated',
       compressV2('1111' + '2222' + '2222' + '2333'),
-      '1111' + `${rleCode}208` + '2333',
+      '1111' + `${RLE_CODE}204` + '333',
     );
     tester.assertEqual(
-      '16 chars - 8 repeating in middle - some spill to first 4 and last 4 - should use RLE for middle',
+      '16 chars - 8 repeating in middle - some spill to first 4 and last 4 - should use RLE for all repeated',
       compressV2('1112' + '2222' + '2222' + '2333'),
-      '1112' + `${rleCode}208` + '2333',
+      '111' + `${RLE_CODE}205` + '333',
     );
 
-    // Invalid lengths
-    tester.assertThrows('should throw for empty', () => compressV2(''));
+    // over 259 chars
+    tester.assertEqual(
+      '260 chars - all repeating - should use RLE for all',
+      compressV2('1'.repeat(260)),
+      `${RLE_CODE}1ff`,
+    );
+    tester.assertEqual(
+      '261 chars - all repeating - should use RLE for first 260',
+      compressV2('1'.repeat(261)),
+      `${RLE_CODE}1ff` + '1',
+    );
+    tester.assertEqual(
+      '262 chars - all repeating - should use RLE for first 260',
+      compressV2('1'.repeat(262)),
+      `${RLE_CODE}1ff` + '11',
+    );
+    tester.assertEqual(
+      '263 chars - all repeating - should use RLE for first 260',
+      compressV2('1'.repeat(263)),
+      `${RLE_CODE}1ff` + '111',
+    );
+    tester.assertEqual(
+      '264 chars - all repeating - should use RLE for first 260',
+      compressV2('1'.repeat(264)),
+      `${RLE_CODE}1ff` + '1111',
+    );
+    tester.assertEqual(
+      '265 chars - all repeating - should use two RLEs',
+      compressV2('1'.repeat(265)),
+      `${RLE_CODE}1ff` + `${RLE_CODE}100`,
+    );
+
+    tester.assertEqual('should return empty for empty', compressV2(''), '');
     [1, 3, 5, 13].forEach((len) => {
-      tester.assertThrows(`should throw for non-multiple of 4 length (${len})`, () =>
+      tester.assertEqual(
+        `should return for non-multiple of 4 length less than 4 long without using RLE (${len})`,
         compressV2('1'.repeat(len)),
+        compressV2('1'.repeat(len)),
+      );
+    });
+    [5, 13].forEach((len) => {
+      tester.assertEqual(
+        `should return RLE for non-multiple of 4 length over 4 (${len})`,
+        compressV2('1'.repeat(len)),
+        `${RLE_CODE}1${(len - 5).toString(16).padStart(2, '0')}`,
       );
     });
 
@@ -544,13 +617,21 @@ function runTests() {
     tester.startNew(`${decompressV2.name} Tests`);
 
     [
+      '0',
+      '00',
+      '000',
       '0000',
+      '9',
+      '99',
+      '999',
       '9999',
+      'a',
+      'aa',
+      'aaa',
+      'aaaa',
       '1a2b',
-      'abab',
       '0'.repeat(8),
       '9'.repeat(8),
-      'a'.repeat(8),
       'b'.repeat(8),
       '0'.repeat(12),
       '9'.repeat(12),
@@ -562,6 +643,7 @@ function runTests() {
       'a'.repeat(16),
       'b'.repeat(16),
       '1234444444444567',
+      '123444444444456',
     ].forEach((testStr) => {
       tester.assertEqual(
         `compressing and decompressing '${testStr}'`,
