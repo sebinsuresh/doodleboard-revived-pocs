@@ -55,10 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const compressedV3 = compressV3(testDrawingUncompressed);
   console.log('v3', compressedV3.length, compressedV3);
-  const compressedV3TrimmedThenV1 = compressV1(compressedV3.substring(0, 4 * ~~(compressedV3.length / 4)));
-  console.log('v3(trim)->v1', compressedV3TrimmedThenV1.length, compressedV3TrimmedThenV1);
-  // const compressedV3ThenV1 = compressV1(compressedV3);
-  // console.log('v3->v1', compressedV3ThenV1.length, compressedV3ThenV1);
+  const compressedV3ThenV1 = compressV1(compressedV3);
+  console.log('v3->v1', compressedV3ThenV1.length, compressedV3ThenV1);
 
   // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 4, 20));
   // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 5, -1));
@@ -87,7 +85,7 @@ function renderUncompressed(ctx, cellSide) {
  * its last 2 bits.
  *
  * @param {string} uncompressedHexString
- * */
+ */
 function compressV1(uncompressedHexString) {
   if (!uncompressedHexString.length) {
     return uncompressedHexString;
@@ -142,7 +140,7 @@ function decompressV1(compressedV1String) {
  * Use {@link compressV1} to compress the result further.
  *
  * @param {string} uncompressedDoodleString
- * */
+ */
 function compressV2(uncompressedDoodleString) {
   if (!uncompressedDoodleString.length) {
     return uncompressedDoodleString;
@@ -175,20 +173,20 @@ function compressV2(uncompressedDoodleString) {
     }
 
     if (repeatCount >= USE_REPEAT_AFTER) {
-      const adjustedRepeatHex = (repeatCount - USE_REPEAT_AFTER).toString(16).padStart(2, '0');
-      compressed += `${RLE_CODE}${currentChar}${adjustedRepeatHex}`;
+      const adjustedRepeatCountHex = (repeatCount - USE_REPEAT_AFTER).toString(16).padStart(2, '0');
+      compressed += `${RLE_CODE}${currentChar}${adjustedRepeatCountHex}`;
       i += repeatCount;
     } else if (repeatCount > 1) {
       // These two else cases can be a single else, but keeping it like this to be explicit.
 
-      compressed += uncompressedDoodleString[i].repeat(repeatCount);
+      compressed += currentChar.repeat(repeatCount);
       i += repeatCount;
     } else {
-      compressed += uncompressedDoodleString[i];
+      compressed += currentChar;
       i++;
     }
   }
-  compressed += uncompressedDoodleString.substring(i, uncompressedDoodleString.length);
+  compressed += uncompressedDoodleString.substring(i);
 
   return compressed;
 }
@@ -219,48 +217,62 @@ function decompressV2(compressedV2String) {
   return decompressed;
 }
 
-/** @param {string} uncompressedDoodleString */
+/**
+ * Compress doodle string using a mix of RLE and indexed lookups.
+ *
+ * @param {string} uncompressedDoodleString
+ */
 function compressV3(uncompressedDoodleString) {
   if (!uncompressedDoodleString.length) {
     return uncompressedDoodleString;
   }
-  // TODO: can I remove these restrictions on the string?
-  if (uncompressedDoodleString.length % 4 !== 0) {
-    throw new Error('Uncompressed string length must be a multiple of 4');
-  }
+  // TODO: can I remove this restriction on the string?
   if (uncompressedDoodleString.match(/[^0-9ab]/)) {
     throw new Error('Doodle strings can only contain 0-9, a, b palette indices.');
   }
 
-  const rleCode = 'c';
-  const lookupCode = 'd';
-  const lookupItemSeparator = 'e';
-  const lookupSeparator = 'f';
+  const RLE_CODE = 'c';
+  // Repeat count in output string starts at 5 and ends at max value.
+  // If repeat count === 0, that means 5 repeats.
+  // If repeat count === 1, 6 repeats.
+  // If repeat count === 255, 260 repeats.
+  const USE_REPEAT_AFTER = 5;
+  const LOOKUP_CODE = 'd';
+  const LOOKUP_ITEM_SEP = 'e';
+  const LOOKUP_SEP = 'f';
 
   const countsOf5LongStrings = getCountOfStringsOfLength(uncompressedDoodleString, 5, 3, -1);
   const countsOf6LongStrings = getCountOfStringsOfLength(uncompressedDoodleString, 6, 3, -1);
   const countsOf7LongStrings = getCountOfStringsOfLength(uncompressedDoodleString, 7, 3, -1);
   const countsOf8LongStrings = getCountOfStringsOfLength(uncompressedDoodleString, 8, 3, -1);
-  const usedLookups = [];
 
+  const usedLookups = [];
   let compressed = '';
-  for (let i = 0; i < uncompressedDoodleString.length - 4; i++) {
+  let i = 0;
+  let j = 0; // TODO: Remove after debugging
+  while (i < uncompressedDoodleString.length - 4) {
+    j++;
     let repeatCount = 1;
     let currentChar = uncompressedDoodleString[i];
 
     while (
       uncompressedDoodleString[i + repeatCount] === currentChar &&
-      repeatCount < 255 &&
-      i + repeatCount < uncompressedDoodleString.length - 4
+      repeatCount < 256 + USE_REPEAT_AFTER &&
+      i + repeatCount < uncompressedDoodleString.length
     ) {
       repeatCount++;
     }
+    console.log('b');
+    if (j > 5000) break;
 
     // TODO: refactor
-    if (repeatCount > 4) {
-      compressed += `${rleCode}${currentChar}${repeatCount.toString(16).padStart(2, '0')}`;
-      i += repeatCount - 1;
-    } else if (i < uncompressedDoodleString.length - 8) {
+    if (repeatCount >= USE_REPEAT_AFTER) {
+      const adjustedRepeatCountHex = (repeatCount - USE_REPEAT_AFTER).toString(16).padStart(2, '0');
+      compressed += `${RLE_CODE}${currentChar}${adjustedRepeatCountHex}`;
+      i += repeatCount;
+      continue;
+    }
+    if (i < uncompressedDoodleString.length - 8) {
       const substring = uncompressedDoodleString.substring(i, i + 8);
       const count = countsOf8LongStrings[substring];
       if (count) {
@@ -269,12 +281,13 @@ function compressV3(uncompressedDoodleString) {
           usedLookups.push({ value: substring, length: 8, count: count });
           index = usedLookups.length - 1;
         }
-        compressed += `${lookupCode}${index.toString(16).padStart(3, '0')}`;
+        compressed += `${LOOKUP_CODE}${index.toString(16).padStart(3, '0')}`;
 
-        i += 8 - 1;
+        i += 8;
         continue;
       }
-    } else if (i < uncompressedDoodleString.length - 7) {
+    }
+    if (i < uncompressedDoodleString.length - 7) {
       const substring = uncompressedDoodleString.substring(i, i + 7);
       const count = countsOf7LongStrings[substring];
       if (count) {
@@ -283,12 +296,13 @@ function compressV3(uncompressedDoodleString) {
           usedLookups.push({ value: substring, length: 7, count: count });
           index = usedLookups.length - 1;
         }
-        compressed += `${lookupCode}${index.toString(16).padStart(3, '0')}`;
+        compressed += `${LOOKUP_CODE}${index.toString(16).padStart(3, '0')}`;
 
-        i += 7 - 1;
+        i += 7;
         continue;
       }
-    } else if (i < uncompressedDoodleString.length - 6) {
+    }
+    if (i < uncompressedDoodleString.length - 6) {
       const substring = uncompressedDoodleString.substring(i, i + 6);
       const count = countsOf6LongStrings[substring];
       if (count) {
@@ -297,12 +311,13 @@ function compressV3(uncompressedDoodleString) {
           usedLookups.push({ value: substring, length: 6, count: count });
           index = usedLookups.length - 1;
         }
-        compressed += `${lookupCode}${index.toString(16).padStart(3, '0')}`;
+        compressed += `${LOOKUP_CODE}${index.toString(16).padStart(3, '0')}`;
 
-        i += 6 - 1;
+        i += 6;
         continue;
       }
-    } else if (i < uncompressedDoodleString.length - 5) {
+    }
+    if (i < uncompressedDoodleString.length - 5) {
       const substring = uncompressedDoodleString.substring(i, i + 5);
       const count = countsOf5LongStrings[substring];
       if (count) {
@@ -311,19 +326,24 @@ function compressV3(uncompressedDoodleString) {
           usedLookups.push({ value: substring, length: 5, count: count });
           index = usedLookups.length - 1;
         }
-        compressed += `${lookupCode}${index.toString(16).padStart(3, '0')}`;
+        compressed += `${LOOKUP_CODE}${index.toString(16).padStart(3, '0')}`;
 
-        i += 5 - 1;
+        i += 5;
         continue;
       }
+    }
+
+    // These two else cases can be a single else, but keeping it like this to be explicit.
+    if (repeatCount > 1) {
+      compressed += currentChar.repeat(repeatCount);
+      i += repeatCount;
     } else {
-      compressed += `${uncompressedDoodleString.substring(i, i + 4)}`;
-      i += 3;
-      continue;
+      compressed += currentChar;
+      i++;
     }
   }
-  compressed += `${uncompressedDoodleString.substring(uncompressedDoodleString.length - 4)}`;
-  compressed = usedLookups.map((l) => l.value).join(lookupItemSeparator) + lookupSeparator + compressed;
+  compressed += uncompressedDoodleString.substring(i);
+  compressed = usedLookups.map((l) => l.value).join(LOOKUP_ITEM_SEP) + LOOKUP_SEP + compressed;
 
   return compressed;
 }
