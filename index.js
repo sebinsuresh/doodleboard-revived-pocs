@@ -80,40 +80,53 @@ function renderUncompressed(ctx, cellSide) {
   }
 }
 
-// TODO: Do i need to rewrite this? The last 4 hex will be problematic:
-// E.g. We won't know if a last '0x10' came from '0010' or '10'
-//
-// hexString: '1234 0010' -> compressV1: char(0x1234) char(0x10)
-// hexString: '1234 10'   -> compressV1: char(0x1234) char(0x10)
-//
-// 1. I could add a character at the beginning to indicate the total length of the source string.
-// 2. I could add 4 bits (one hex) to indicate which bits were present out of last 4 bits in source string.
-// so 1111 (f), 1110 (e), 1100 (c), or 1000 (8). Continuing example above:
-// compressV1: 0xc 0x1234 0x10 -> hexString: '1234 10'
-// compressV1: 0xe 0x1234 0x10 -> hexString: '1234 010'
-// compressV1: 0xf 0x1234 0x10 -> hexString: '1234 0010'
-// compressV1: 0x8 0x1234 0x10 -> invalid, since at least 2 bits must be active.
 /** @param {string} uncompressedHexString */
 function compressV1(uncompressedHexString) {
-  if (!uncompressedHexString.length || uncompressedHexString.length % 4 !== 0) {
-    throw new Error('Uncompressed string length must be a multiple of 4');
+  if (!uncompressedHexString.length) {
+    return uncompressedHexString;
   }
+  if (uncompressedHexString.match(/[^0-9a-f]/)) {
+    throw new Error('CompressV1 input must be a hex string.');
+  }
+
+  // Use the last 2 bits of prefix for storing the number of hex digits
+  // in last character of original string.
+  const prefixString = String.fromCharCode(uncompressedHexString.length % 4);
 
   let compressed = '';
   for (let i = 0; i < uncompressedHexString.length; i += 4) {
-    const hexValue = parseInt(uncompressedHexString.substring(i, i + 4), 16);
+    const hexValue = parseInt(uncompressedHexString.substring(i, i + 4).padStart(4, '0'), 16);
     compressed += String.fromCharCode(hexValue);
   }
+  compressed = prefixString + compressed;
 
   return compressed;
 }
 
 /** @param {string} compressedV1String */
 function decompressV1(compressedV1String) {
-  return compressedV1String
-    .split('')
-    .map((c) => c.charCodeAt(0).toString(16).padStart(4, '0'))
-    .join('');
+  if (!compressedV1String.length) {
+    return compressedV1String;
+  }
+
+  // Total 16 bits in each char of compressed string.
+  // Use the last 2 bits of prefix for storing the number of hex digits
+  // in last character of original string.
+  const prefixBits = compressedV1String.charCodeAt(0) & 0b11;
+
+  let result = '';
+  for (let i = 1; i < compressedV1String.length - 1; i++) {
+    result += compressedV1String[i].charCodeAt(0).toString(16).padStart(4, '0');
+  }
+
+  const lastCharCode = compressedV1String.charCodeAt(compressedV1String.length - 1);
+  if (prefixBits === 0b00) {
+    result += lastCharCode.toString(16).padStart(4, '0');
+  } else {
+    result += lastCharCode.toString(16).padStart(prefixBits, '0');
+  }
+
+  return result;
 }
 
 /** @param {string} uncompressedDoodleString */
@@ -506,11 +519,11 @@ function runTests() {
 }
 
 /** @param {string} compressedString */
-function getHexChars(compressedString) {
+function getHexChars(compressedString, commaSeparated = false) {
   return compressedString
     .split('')
     .map((c) => c.charCodeAt(0).toString(16).padStart(4, '0'))
-    .join('');
+    .join(commaSeparated ? ', ' : '');
 }
 
 // TODO: Use modules, extract to separate file
