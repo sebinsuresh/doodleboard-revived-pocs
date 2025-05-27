@@ -321,7 +321,7 @@ function compressV3(uncompressedDoodleString) {
 // TODO: can maybe improve perf here using other data structures.
 // From benchmarks, Chrome and node performs better with Map, while Firefox performs better using Objects.
 /**
- * @param {string} sourceString
+ * @param {string} sourceString This can be uncompressed doodle string or a v2 compressed string
  * @param {number[]} lengthsToCheck
  * @param {number} minCountToQualify
  */
@@ -329,12 +329,20 @@ function getCountOfSubstringsWithLengths(sourceString, lengthsToCheck, minCountT
   /** @type {Map<string, number>} */
   const map = new Map();
   for (let length of lengthsToCheck) {
-    for (let i = 0; i <= sourceString.length - length; i++) {
-      const substring = sourceString.substring(i, i + length);
-      if (allCharsSame(substring)) {
+    for (let i = 0; i <= sourceString.length - length; ) {
+      if (sourceString[i] === RLE_CODE) {
+        i += 4;
         continue;
       }
+
+      const substring = sourceString.substring(i, i + length);
+      if (allCharsSame(substring)) {
+        i++;
+        continue;
+      }
+
       map.set(substring, (map.get(substring) ?? 0) + 1);
+      i++;
     }
   }
 
