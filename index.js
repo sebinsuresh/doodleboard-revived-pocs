@@ -33,6 +33,12 @@ const palette = [
   '#FFFFFF',
 ];
 
+const RLE_CODE = 'c';
+const USE_REPEAT_AFTER = 5;
+const LOOKUP_CODE = 'd';
+const LOOKUP_ITEM_SEP = 'e';
+const LOOKUP_SEP = 'f';
+
 const testDrawingUncompressed =
   'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb88888bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb800000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0055111100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0555111100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb05555088081111000000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0011110008000000008118000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0111111000001111000811100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010000010111111110081180bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010001010000111111001000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00000111111000110018010bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb000000158551100011011081100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb011000011188110101101100100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0501000011111100011101100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb05100400011111110101100100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010003330001100101111101100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010014344000000000100100110bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0100134444400010000100101110bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0000b000044400000000010001000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0144404044440001010000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0100000040000344000000b0bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0157704045770333000100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0144404044440334000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00004440000443100000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb14444444444444000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb11433344444440000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1443344444430000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1444442444430000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb142224444300000100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb144444443300111111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1144433330111331111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb100333301113333111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00333111111333111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb11011113311130000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb13111133311100088880bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1131111333110000088800bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1331111333100000000880bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1331111000000000000880bbbbbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbb1311111000000000000800bbbbbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbb13111100000000000008000bbbbbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbb11100000000000000008880bbbbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000008880bbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbbbbbb0010000000000000888080bbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbbb00000023300000008800808bbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbbbb000000232000000000088080000080111b000bbbbbbbbbbbbbbbbbbbbbbbbbbb00000033200000000008088888800044400bbbbbbbbbbbbbbbbbbbbbbbbbbbb000000030000000000000000080001444000bbbbbbbbbbbbbbbbbbbbbbbbbbb00000000000000000000000000000114440014bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000000144111114bbbbbbbbbbbbbbbbbbbbbbbbbb00000000000000000000000000000144144444bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000001444114444bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000001444411111bbbb';
 
@@ -64,6 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('v3', compressedV3.length, compressedV3);
   const compressedV3ThenV1 = compressV1(compressedV3);
   console.log('v3->v1', compressedV3ThenV1.length, compressedV3ThenV1);
+
+  console.log(
+    'decompress: v1 -> v3 -> original',
+    testDrawingUncompressed === decompressV3(decompressV1(compressedV3ThenV1)),
+  );
+  console.log('decompress: v3 -> original', testDrawingUncompressed === decompressV3(compressedV3));
 
   // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 4, 20));
   // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 5, -1));
@@ -158,12 +170,10 @@ function compressV2(uncompressedDoodleString) {
     throw new Error('Doodle strings can only contain 0-9, a, b palette indices.');
   }
 
-  const RLE_CODE = 'c';
   // Repeat count in output string starts at 5 and ends at max value.
   // If repeat count === 0, that means 5 repeats.
   // If repeat count === 1, 6 repeats.
   // If repeat count === 255, 260 repeats.
-  const USE_REPEAT_AFTER = 5;
 
   let compressed = '';
   let i = 0;
@@ -204,9 +214,6 @@ function decompressV2(compressedV2String) {
     return compressedV2String;
   }
 
-  const RLE_CODE = 'c';
-  const USE_REPEAT_AFTER = 5;
-
   let decompressed = '';
   for (let i = 0; i < compressedV2String.length; ) {
     const currentChar = compressedV2String[i];
@@ -238,15 +245,10 @@ function compressV3(uncompressedDoodleString) {
     throw new Error('Doodle strings can only contain 0-9, a, b palette indices.');
   }
 
-  const RLE_CODE = 'c';
   // Repeat count in output string starts at 5 and ends at max value.
   // If repeat count === 0, that means 5 repeats.
   // If repeat count === 1, 6 repeats.
   // If repeat count === 255, 260 repeats.
-  const USE_REPEAT_AFTER = 5;
-  const LOOKUP_CODE = 'd';
-  const LOOKUP_ITEM_SEP = 'e';
-  const LOOKUP_SEP = 'f';
 
   const countsOfStrings = getCountOfSubstringsWithLengths(uncompressedDoodleString, [5, 6, 7, 8]);
 
@@ -354,6 +356,36 @@ function allCharsSame(substring) {
   }
 
   return true;
+}
+
+/**
+ * @param {string} compressedV3String
+ */
+function decompressV3(compressedV3String) {
+  if (!compressedV3String.length) {
+    return compressedV3String;
+  }
+
+  const lookupSeparatorIndex = compressedV3String.indexOf(LOOKUP_SEP);
+  const lookups = compressedV3String.slice(0, lookupSeparatorIndex).split(LOOKUP_ITEM_SEP).filter(Boolean);
+  const data = compressedV3String.slice(lookupSeparatorIndex + 1);
+  let decompressed = '';
+  for (let i = 0; i < data.length; ) {
+    const currentChar = data[i];
+    if (currentChar === RLE_CODE) {
+      const currentFour = data.substring(i, i + 4);
+      decompressed += currentFour[1].repeat(parseInt(currentFour.substring(2, 4), 16) + USE_REPEAT_AFTER);
+      i += 4;
+    } else if (currentChar === LOOKUP_CODE) {
+      const lookupIndex = parseInt(data.substring(i + 1, i + 3), 16);
+      decompressed += lookups[lookupIndex];
+      i += 3;
+    } else {
+      decompressed += currentChar;
+      i++;
+    }
+  }
+  return decompressed;
 }
 
 function runTests() {
