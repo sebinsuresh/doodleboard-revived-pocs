@@ -17,90 +17,44 @@ Then run RLE on it.
  * @property {number} count
  */
 
-const palette = [
-  '#14141E',
-  '#46282D',
-  '#9B4146',
-  '#BE783C',
-  '#D7AF87',
-  '#EBEBAF',
-  '#64AF50',
-  '#556E6E',
-  '#3C3C5F',
-  '#96D2F0',
-  '#A07DA0',
-  // '#000000',
-  '#FFFFFF',
-];
-
 const RLE_CODE = 'c';
 const USE_REPEAT_AFTER = 5;
 const LOOKUP_CODE = 'd';
 const LOOKUP_ITEM_SEP = 'e';
 const LOOKUP_SEP = 'f';
 
-const testDrawingUncompressed = ('0123456789ab'.repeat(5) + '0123').repeat(64);
-// const testDrawingUncompressed =
-//   'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb88888bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb800000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0055111100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0555111100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb05555088081111000000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0011110008000000008118000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0111111000001111000811100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010000010111111110081180bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010001010000111111001000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00000111111000110018010bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb000000158551100011011081100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb011000011188110101101100100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0501000011111100011101100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb05100400011111110101100100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010003330001100101111101100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010014344000000000100100110bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0100134444400010000100101110bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0000b000044400000000010001000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0144404044440001010000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0100000040000344000000b0bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0157704045770333000100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0144404044440334000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00004440000443100000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb14444444444444000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb11433344444440000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1443344444430000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1444442444430000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb142224444300000100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb144444443300111111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1144433330111331111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb100333301113333111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00333111111333111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb11011113311130000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb13111133311100088880bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1131111333110000088800bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1331111333100000000880bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1331111000000000000880bbbbbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbb1311111000000000000800bbbbbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbb13111100000000000008000bbbbbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbb11100000000000000008880bbbbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000008880bbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbbbbbb0010000000000000888080bbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbbb00000023300000008800808bbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbbbb000000232000000000088080000080111b000bbbbbbbbbbbbbbbbbbbbbbbbbbb00000033200000000008088888800044400bbbbbbbbbbbbbbbbbbbbbbbbbbbb000000030000000000000000080001444000bbbbbbbbbbbbbbbbbbbbbbbbbbb00000000000000000000000000000114440014bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000000144111114bbbbbbbbbbbbbbbbbbbbbbbbbb00000000000000000000000000000144144444bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000001444114444bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000001444411111bbbb';
+console.log('original', testDrawingUncompressed.length, testDrawingUncompressed);
+const compressedV1 = compressV1(testDrawingUncompressed);
+console.log('v1', compressedV1.length, compressedV1);
 
-// document on load
-const NUM_ROWS_COLS = 64;
+const compressedV2 = compressV2(testDrawingUncompressed);
+console.log('v2', compressedV2.length, compressedV2);
+const compressedV2ThenV1 = compressV1(compressedV2);
+console.log('v2->v1', compressedV2ThenV1.length, compressedV2ThenV1);
 
-document.addEventListener('DOMContentLoaded', () => {
-  const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('doodle'));
-  const ctx = canvas.getContext('2d');
+const compressedV3 = compressV3(testDrawingUncompressed);
+console.log('v3', compressedV3.length, compressedV3);
+const compressedV3ThenV1 = compressV1(compressedV3);
+console.log('v3->v1', compressedV3ThenV1.length, compressedV3ThenV1);
 
-  // bg
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+console.log(
+  'decompress: v1 -> v3 -> original:',
+  testDrawingUncompressed === decompressV3(decompressV1(compressedV3ThenV1)),
+);
+console.log('decompress: v3 -> original:', testDrawingUncompressed === decompressV3(compressedV3));
+console.log(
+  'using decompressV3 on v2 compressed string:',
+  testDrawingUncompressed === decompressV3(compressedV2),
+);
 
-  // cells
-  const cellSide = ~~(canvas.width / NUM_ROWS_COLS);
-  renderUncompressed(ctx, cellSide);
+// console.log(getCountOfStringsOfLength(testDrawingUncompressed, 4, 20));
+// console.log(getCountOfStringsOfLength(testDrawingUncompressed, 5, -1));
+// console.log(getCountOfStringsOfLength(testDrawingUncompressed, 6, -1));
+// console.log(getCountOfStringsOfLength(compressedV2, 5, -1));
+// console.log(getCountOfStringsOfLength(compressedV2, 6, -1));
+// console.log(getCountOfStringsOfLength(compressedV2, 7, -1));
 
-  console.log('original', testDrawingUncompressed.length, testDrawingUncompressed);
-  const compressedV1 = compressV1(testDrawingUncompressed);
-  console.log('v1', compressedV1.length, compressedV1);
-
-  const compressedV2 = compressV2(testDrawingUncompressed);
-  console.log('v2', compressedV2.length, compressedV2);
-  const compressedV2ThenV1 = compressV1(compressedV2);
-  console.log('v2->v1', compressedV2ThenV1.length, compressedV2ThenV1);
-
-  const compressedV3 = compressV3(testDrawingUncompressed);
-  console.log('v3', compressedV3.length, compressedV3);
-  const compressedV3ThenV1 = compressV1(compressedV3);
-  console.log('v3->v1', compressedV3ThenV1.length, compressedV3ThenV1);
-
-  console.log(
-    'decompress: v1 -> v3 -> original:',
-    testDrawingUncompressed === decompressV3(decompressV1(compressedV3ThenV1)),
-  );
-  console.log('decompress: v3 -> original:', testDrawingUncompressed === decompressV3(compressedV3));
-  console.log(
-    'using decompressV3 on v2 compressed string:',
-    testDrawingUncompressed === decompressV3(compressedV2),
-  );
-
-  // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 4, 20));
-  // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 5, -1));
-  // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 6, -1));
-  // console.log(getCountOfStringsOfLength(compressedV2, 5, -1));
-  // console.log(getCountOfStringsOfLength(compressedV2, 6, -1));
-  // console.log(getCountOfStringsOfLength(compressedV2, 7, -1));
-
-  // runTests();
-});
-
-function renderUncompressed(ctx, cellSide) {
-  ctx.strokeStyle = null;
-  for (let i = 0; i < testDrawingUncompressed.length; i++) {
-    const row = ~~(i % NUM_ROWS_COLS);
-    const col = ~~(i / NUM_ROWS_COLS);
-    ctx.fillStyle = palette[parseInt(testDrawingUncompressed[i], 16)];
-    ctx.fillRect(row * cellSide, col * cellSide, cellSide, cellSide);
-  }
-}
+// runTests();
 
 /**
  * Compresses given hex string by encoding each 4 hex digits to a single char.
