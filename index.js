@@ -248,12 +248,7 @@ function compressV3(uncompressedDoodleString) {
   const LOOKUP_ITEM_SEP = 'e';
   const LOOKUP_SEP = 'f';
 
-  const countsOfStrings = {
-    5: getCountOfStringsOfLength(uncompressedDoodleString, 5),
-    6: getCountOfStringsOfLength(uncompressedDoodleString, 6),
-    7: getCountOfStringsOfLength(uncompressedDoodleString, 7),
-    8: getCountOfStringsOfLength(uncompressedDoodleString, 8),
-  };
+  const countsOfStrings = getCountOfSubstringsWithLengths(uncompressedDoodleString, [5, 6, 7, 8]);
 
   /** @type {LookupItem[]} */
   const usedLookups = [];
@@ -283,7 +278,7 @@ function compressV3(uncompressedDoodleString) {
     while (!lookupFound && currLength >= 5) {
       if (i <= uncompressedDoodleString.length - currLength && usedLookups.length < 255) {
         const substring = uncompressedDoodleString.substring(i, i + currLength);
-        const count = countsOfStrings[currLength].get(substring);
+        const count = countsOfStrings.get(substring);
         if (count) {
           let index = usedLookups.findIndex((item) => item.value === substring);
           if (index === -1) {
@@ -321,24 +316,26 @@ function compressV3(uncompressedDoodleString) {
 // From benchmarks, Chrome and node performs better with Map, while Firefox performs better using Objects.
 /**
  * @param {string} sourceString
- * @param {number} length
- * @param {number} minCount
+ * @param {number[]} lengthsToCheck
+ * @param {number} minCountToQualify
  */
-function getCountOfStringsOfLength(sourceString, length, minCount = 3) {
+function getCountOfSubstringsWithLengths(sourceString, lengthsToCheck, minCountToQualify = 3) {
   /** @type {Map<string, number>} */
   const map = new Map();
-  for (let i = 0; i <= sourceString.length - length; i++) {
-    const substring = sourceString.substring(i, i + length);
-    if (allCharsSame(substring)) {
-      continue;
+  for (let length of lengthsToCheck) {
+    for (let i = 0; i <= sourceString.length - length; i++) {
+      const substring = sourceString.substring(i, i + length);
+      if (allCharsSame(substring)) {
+        continue;
+      }
+      map.set(substring, (map.get(substring) ?? 0) + 1);
     }
-    map.set(substring, (map.get(substring) ?? 0) + 1);
   }
 
   /** @type {Map<string, number>} */
   const filteredMap = new Map();
   for (const [key, value] of map) {
-    if (value >= minCount) {
+    if (value >= minCountToQualify) {
       filteredMap.set(key, value);
     }
   }
