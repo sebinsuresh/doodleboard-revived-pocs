@@ -236,7 +236,7 @@ function decompressV2(compressedV2String) {
 }
 
 /**
- * Compress doodle string using a mix of RLE and indexed lookups.
+ * Compress doodle string using a mix of RLE and indexed lookups (if that makes result shorter).
  *
  * @param {string} uncompressedDoodleString
  */
@@ -249,41 +249,44 @@ function compressV3(uncompressedDoodleString) {
     throw new Error('Doodle strings can only contain 0-9, a, b palette indices.');
   }
 
-  // Repeat count in output string starts at 5 and ends at max value.
-  // If repeat count === 0, that means 5 repeats.
-  // If repeat count === 1, 6 repeats.
-  // If repeat count === 255, 260 repeats.
+  const rleString = compressV2(uncompressedDoodleString);
 
-  const countsOfStrings = getCountOfSubstringsWithLengths(uncompressedDoodleString, [5, 6, 7, 8]);
+  const countsOfStrings = getCountOfSubstringsWithLengths(rleString, [5, 6, 7, 8]);
+  if (countsOfStrings.size === 0) {
+    return rleString;
+  }
 
   /** @type {LookupItem[]} */
   const usedLookups = [];
   let compressed = '';
   let i = 0;
-  while (i < uncompressedDoodleString.length - 4) {
-    let repeatCount = 1;
-    let currentChar = uncompressedDoodleString[i];
+  while (i < rleString.length) {
+    let currentChar = rleString[i];
 
-    while (
-      uncompressedDoodleString[i + repeatCount] === currentChar &&
-      repeatCount < 255 + USE_REPEAT_AFTER &&
-      i + repeatCount < uncompressedDoodleString.length
-    ) {
-      repeatCount++;
-    }
-
-    if (repeatCount >= USE_REPEAT_AFTER) {
-      const adjustedRepeatCountHex = (repeatCount - USE_REPEAT_AFTER).toString(16).padStart(2, '0');
-      compressed += `${RLE_CODE}${currentChar}${adjustedRepeatCountHex}`;
-      i += repeatCount;
+    if (currentChar === RLE_CODE) {
+      compressed += rleString.substring(i, i + 4);
+      i += 4;
       continue;
     }
 
     let lookupFound = false;
     let currLength = 8;
     while (!lookupFound && currLength >= 5) {
-      if (i <= uncompressedDoodleString.length - currLength && usedLookups.length < 255) {
-        const substring = uncompressedDoodleString.substring(i, i + currLength);
+      if (usedLookups.length > 255) {
+        break;
+      }
+      if (i <= rleString.length - currLength) {
+        const substring = rleString.substring(i, i + currLength);
+        const rleCodeIndexInSubstring = substring.indexOf(RLE_CODE);
+        if (rleCodeIndexInSubstring !== -1) {
+          if (rleCodeIndexInSubstring < 5) {
+            break;
+          }
+
+          currLength--;
+          continue;
+        }
+
         const count = countsOfStrings.get(substring);
         if (count) {
           let index = usedLookups.findIndex((item) => item.value === substring);
@@ -303,17 +306,17 @@ function compressV3(uncompressedDoodleString) {
       continue;
     }
 
-    // These two else cases can be a single else, but keeping it like this to be explicit.
-    if (repeatCount > 1) {
-      compressed += currentChar.repeat(repeatCount);
-      i += repeatCount;
-    } else {
-      compressed += currentChar;
-      i++;
-    }
+    compressed += currentChar;
+    i++;
   }
-  compressed += uncompressedDoodleString.substring(i);
-  compressed = usedLookups.map((l) => l.value).join(LOOKUP_ITEM_SEP) + LOOKUP_SEP + compressed;
+  compressed += rleString.substring(i);
+  if (usedLookups.length) {
+    compressed = usedLookups.map((l) => l.value).join(LOOKUP_ITEM_SEP) + LOOKUP_SEP + compressed;
+  }
+
+  if (compressed.length > rleString.length) {
+    return rleString;
+  }
 
   return compressed;
 }
