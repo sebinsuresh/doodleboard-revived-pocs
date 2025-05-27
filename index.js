@@ -10,6 +10,13 @@ Then run RLE on it.
 
 */
 
+/**
+ * @typedef {Object} LookupItem
+ * @property {string} value
+ * @property {number} length
+ * @property {number} count
+ */
+
 const palette = [
   '#14141E',
   '#46282D',
@@ -44,19 +51,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const cellSide = ~~(canvas.width / NUM_ROWS_COLS);
   renderUncompressed(ctx, cellSide);
 
-  // console.log('original', testDrawingUncompressed.length, testDrawingUncompressed);
-  // const compressedV1 = compressV1(testDrawingUncompressed);
-  // console.log('v1', compressedV1.length, compressedV1);
+  console.log('original', testDrawingUncompressed.length, testDrawingUncompressed);
+  const compressedV1 = compressV1(testDrawingUncompressed);
+  console.log('v1', compressedV1.length, compressedV1);
 
-  // const compressedV2 = compressV2(testDrawingUncompressed);
-  // console.log('v2', compressedV2.length, compressedV2);
-  // const compressedV2ThenV1 = compressV1(compressedV2);
-  // console.log('v2->v1', compressedV2ThenV1.length, compressedV2ThenV1);
+  const compressedV2 = compressV2(testDrawingUncompressed);
+  console.log('v2', compressedV2.length, compressedV2);
+  const compressedV2ThenV1 = compressV1(compressedV2);
+  console.log('v2->v1', compressedV2ThenV1.length, compressedV2ThenV1);
 
-  // const compressedV3 = compressV3(testDrawingUncompressed);
-  // console.log('v3', compressedV3.length, compressedV3);
-  // const compressedV3ThenV1 = compressV1(compressedV3);
-  // console.log('v3->v1', compressedV3ThenV1.length, compressedV3ThenV1);
+  const compressedV3 = compressV3(testDrawingUncompressed);
+  console.log('v3', compressedV3.length, compressedV3);
+  const compressedV3ThenV1 = compressV1(compressedV3);
+  console.log('v3->v1', compressedV3ThenV1.length, compressedV3ThenV1);
 
   // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 4, 20));
   // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 5, -1));
@@ -65,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // console.log(getCountOfStringsOfLength(compressedV2, 6, -1));
   // console.log(getCountOfStringsOfLength(compressedV2, 7, -1));
 
-  runTests();
+  // runTests();
 });
 
 function renderUncompressed(ctx, cellSide) {
@@ -73,7 +80,7 @@ function renderUncompressed(ctx, cellSide) {
   for (let i = 0; i < testDrawingUncompressed.length; i++) {
     const row = ~~(i % NUM_ROWS_COLS);
     const col = ~~(i / NUM_ROWS_COLS);
-    ctx.fillStyle = palette[parseInt(`0x${testDrawingUncompressed[i]}`)];
+    ctx.fillStyle = palette[parseInt(testDrawingUncompressed[i], 16)];
     ctx.fillRect(row * cellSide, col * cellSide, cellSide, cellSide);
   }
 }
@@ -241,96 +248,58 @@ function compressV3(uncompressedDoodleString) {
   const LOOKUP_ITEM_SEP = 'e';
   const LOOKUP_SEP = 'f';
 
-  const countsOf5LongStrings = getCountOfStringsOfLength(uncompressedDoodleString, 5, 3, -1);
-  const countsOf6LongStrings = getCountOfStringsOfLength(uncompressedDoodleString, 6, 3, -1);
-  const countsOf7LongStrings = getCountOfStringsOfLength(uncompressedDoodleString, 7, 3, -1);
-  const countsOf8LongStrings = getCountOfStringsOfLength(uncompressedDoodleString, 8, 3, -1);
+  const countsOfStrings = {
+    5: getCountOfStringsOfLength(uncompressedDoodleString, 5),
+    6: getCountOfStringsOfLength(uncompressedDoodleString, 6),
+    7: getCountOfStringsOfLength(uncompressedDoodleString, 7),
+    8: getCountOfStringsOfLength(uncompressedDoodleString, 8),
+  };
 
+  /** @type {LookupItem[]} */
   const usedLookups = [];
   let compressed = '';
   let i = 0;
-  let j = 0; // TODO: Remove after debugging
   while (i < uncompressedDoodleString.length - 4) {
-    j++;
     let repeatCount = 1;
     let currentChar = uncompressedDoodleString[i];
 
     while (
       uncompressedDoodleString[i + repeatCount] === currentChar &&
-      repeatCount < 256 + USE_REPEAT_AFTER &&
+      repeatCount < 255 + USE_REPEAT_AFTER &&
       i + repeatCount < uncompressedDoodleString.length
     ) {
       repeatCount++;
     }
-    console.log('b');
-    if (j > 5000) break;
 
-    // TODO: refactor
     if (repeatCount >= USE_REPEAT_AFTER) {
       const adjustedRepeatCountHex = (repeatCount - USE_REPEAT_AFTER).toString(16).padStart(2, '0');
       compressed += `${RLE_CODE}${currentChar}${adjustedRepeatCountHex}`;
       i += repeatCount;
       continue;
     }
-    if (i < uncompressedDoodleString.length - 8) {
-      const substring = uncompressedDoodleString.substring(i, i + 8);
-      const count = countsOf8LongStrings[substring];
-      if (count) {
-        let index = usedLookups.findIndex((item) => item.value === substring);
-        if (index === -1) {
-          usedLookups.push({ value: substring, length: 8, count: count });
-          index = usedLookups.length - 1;
-        }
-        compressed += `${LOOKUP_CODE}${index.toString(16).padStart(3, '0')}`;
 
-        i += 8;
-        continue;
+    let lookupFound = false;
+    let currLength = 8;
+    while (!lookupFound && currLength >= 5) {
+      if (i <= uncompressedDoodleString.length - currLength && usedLookups.length < 255) {
+        const substring = uncompressedDoodleString.substring(i, i + currLength);
+        const count = countsOfStrings[currLength].get(substring);
+        if (count) {
+          let index = usedLookups.findIndex((item) => item.value === substring);
+          if (index === -1) {
+            usedLookups.push({ value: substring, length: currLength, count: count });
+            index = usedLookups.length - 1;
+          }
+          compressed += `${LOOKUP_CODE}${index.toString(16).padStart(2, '0')}`;
+
+          lookupFound = true;
+          i += currLength;
+        }
       }
+      currLength--;
     }
-    if (i < uncompressedDoodleString.length - 7) {
-      const substring = uncompressedDoodleString.substring(i, i + 7);
-      const count = countsOf7LongStrings[substring];
-      if (count) {
-        let index = usedLookups.findIndex((item) => item.value === substring);
-        if (index === -1) {
-          usedLookups.push({ value: substring, length: 7, count: count });
-          index = usedLookups.length - 1;
-        }
-        compressed += `${LOOKUP_CODE}${index.toString(16).padStart(3, '0')}`;
-
-        i += 7;
-        continue;
-      }
-    }
-    if (i < uncompressedDoodleString.length - 6) {
-      const substring = uncompressedDoodleString.substring(i, i + 6);
-      const count = countsOf6LongStrings[substring];
-      if (count) {
-        let index = usedLookups.findIndex((item) => item.value === substring);
-        if (index === -1) {
-          usedLookups.push({ value: substring, length: 6, count: count });
-          index = usedLookups.length - 1;
-        }
-        compressed += `${LOOKUP_CODE}${index.toString(16).padStart(3, '0')}`;
-
-        i += 6;
-        continue;
-      }
-    }
-    if (i < uncompressedDoodleString.length - 5) {
-      const substring = uncompressedDoodleString.substring(i, i + 5);
-      const count = countsOf5LongStrings[substring];
-      if (count) {
-        let index = usedLookups.findIndex((item) => item.value === substring);
-        if (index === -1) {
-          usedLookups.push({ value: substring, length: 5, count: count });
-          index = usedLookups.length - 1;
-        }
-        compressed += `${LOOKUP_CODE}${index.toString(16).padStart(3, '0')}`;
-
-        i += 5;
-        continue;
-      }
+    if (lookupFound) {
+      continue;
     }
 
     // These two else cases can be a single else, but keeping it like this to be explicit.
@@ -348,48 +317,46 @@ function compressV3(uncompressedDoodleString) {
   return compressed;
 }
 
+// TODO: can maybe improve perf here using other data structures.
+// From benchmarks, Chrome and node performs better with Map, while Firefox performs better using Objects.
 /**
  * @param {string} sourceString
  * @param {number} length
+ * @param {number} minCount
  */
-function getCountOfStringsOfLength(sourceString, length, minCount = 2, topN = 10) {
-  // TODO: This might result in dictionaries that give you back substrings that
-  // can't be used together.
-  // E.g. source could be: '..01234560123456..' and you might get '012345' and
-  // '123456' as top substrings.
-  // But you could only utilize one of them in the actual compression.
-  //
-  // Maybe: utilize the entire result dictionary (don't only take topN),
-  // mark the dictionary values that are actually used,
-  // and only include those used ones in the "lookup header" when compressing
-  // and writing results to a string.
-  const map = {};
-  for (let i = 0; i < sourceString.length - length; i++) {
+function getCountOfStringsOfLength(sourceString, length, minCount = 3) {
+  /** @type {Map<string, number>} */
+  const map = new Map();
+  for (let i = 0; i <= sourceString.length - length; i++) {
     const substring = sourceString.substring(i, i + length);
-    if (substring === substring[0].repeat(length)) {
+    if (allCharsSame(substring)) {
       continue;
     }
-    if (map[substring]) {
-      map[substring]++;
-    } else {
-      map[substring] = 1;
+    map.set(substring, (map.get(substring) ?? 0) + 1);
+  }
+
+  /** @type {Map<string, number>} */
+  const filteredMap = new Map();
+  for (const [key, value] of map) {
+    if (value >= minCount) {
+      filteredMap.set(key, value);
     }
   }
-  // let sortedItems = Object.entries(map)
-  //   .filter((item) => item[1] > 1)
-  //   .sort((a, b) => b[1] - a[1]);
-  // if (topN > 0) {
-  //   sortedItems = sortedItems.slice(0, topN);
-  // }
-  // return sortedItems;
-
-  let filteredMap = Object.entries(map)
-    .filter((item) => item[1] >= minCount)
-    .reduce((acc, [key, value]) => {
-      acc[key] = value;
-      return acc;
-    }, {});
   return filteredMap;
+}
+
+/** @param {string} substring */
+function allCharsSame(substring) {
+  if (substring.length === 1) return true;
+
+  const firstChar = substring[0];
+  for (let i = 1; i < substring.length; i++) {
+    if (substring[i] !== firstChar) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function runTests() {
