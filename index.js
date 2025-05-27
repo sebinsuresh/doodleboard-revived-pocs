@@ -72,10 +72,14 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('v3->v1', compressedV3ThenV1.length, compressedV3ThenV1);
 
   console.log(
-    'decompress: v1 -> v3 -> original',
+    'decompress: v1 -> v3 -> original:',
     testDrawingUncompressed === decompressV3(decompressV1(compressedV3ThenV1)),
   );
-  console.log('decompress: v3 -> original', testDrawingUncompressed === decompressV3(compressedV3));
+  console.log('decompress: v3 -> original:', testDrawingUncompressed === decompressV3(compressedV3));
+  console.log(
+    'using decompressV3 on v2 compressed string:',
+    testDrawingUncompressed === decompressV3(compressedV2),
+  );
 
   // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 4, 20));
   // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 5, -1));
@@ -366,9 +370,34 @@ function decompressV3(compressedV3String) {
     return compressedV3String;
   }
 
+  // Support decompressing v3 and v2 strings.
+  //
+  // V3 strings may have lookup separator ('f') after lookups/at the beginning
+  // if no lookups exist.
+  //
+  // The lookup separator may exist elsewhere in the compressed string where
+  // the character 'f' exists.
+  //
+  // In V2 strings, the lookup separator may exist in the RLE length tokens
+  // (e.g. 20 repeats of '9' => 'c90F').
+  //
+  // In V3 strings, the lookup separator may exist in the RLE length tokens,
+  // and in the lookup index tokens (e.g. lookup index 15 => 'd0F').
   const lookupSeparatorIndex = compressedV3String.indexOf(LOOKUP_SEP);
-  const lookups = compressedV3String.slice(0, lookupSeparatorIndex).split(LOOKUP_ITEM_SEP).filter(Boolean);
-  const data = compressedV3String.slice(lookupSeparatorIndex + 1);
+  const firstRleCodeIndex = compressedV3String.indexOf(RLE_CODE);
+  let lookups = [];
+  let data = compressedV3String;
+  if (
+    // look up separator doesn't exist - don't try to use lookup
+    lookupSeparatorIndex !== -1 &&
+    // look up separator exists and RLE code index doesn't exist - use lookup
+    (firstRleCodeIndex === -1 ||
+      // look up separator and RLE code exist, and first RLE code shows up after lookup separator - use lookup
+      (firstRleCodeIndex !== -1 && lookupSeparatorIndex < firstRleCodeIndex))
+  ) {
+    lookups = compressedV3String.slice(0, lookupSeparatorIndex).split(LOOKUP_ITEM_SEP).filter(Boolean);
+    data = compressedV3String.slice(lookupSeparatorIndex + 1);
+  }
   let decompressed = '';
   for (let i = 0; i < data.length; ) {
     const currentChar = data[i];
