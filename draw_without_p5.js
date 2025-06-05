@@ -1,6 +1,7 @@
 const State = {
   HOVERING: 0,
-  DRAWING: 1,
+  DRAWING_PENCIL: 1,
+  DRAWING_RECTANGLE: 2,
 };
 
 class DoodleManager {
@@ -16,6 +17,8 @@ class DoodleManager {
   #pmouseY = 0;
   #state = State.HOVERING;
   #mouseIsPressed = false;
+  #rectStartX;
+  #rectStartY;
 
   /**
    * @param {string} containerId
@@ -45,6 +48,25 @@ class DoodleManager {
       swatch.style.height = '32px';
       swatch.style.backgroundColor = palette[i];
     }
+
+    const toolContainer = document.createElement('div');
+    this.#container.appendChild(toolContainer);
+
+    const clearButton = document.createElement('button');
+    clearButton.textContent = 'Clear';
+    clearButton.addEventListener('click', () => {
+      this.#drawing.fill('b');
+    });
+    toolContainer.appendChild(clearButton);
+
+    const rectButton = document.createElement('button');
+    rectButton.textContent = 'Rectangle';
+    rectButton.addEventListener('click', () => {
+      if (this.#mouseInsideCanvas()) {
+        this.#state = State.DRAWING_RECTANGLE;
+      }
+    });
+    toolContainer.appendChild(rectButton);
 
     this.#drawing = initialDrawing.split('');
     this.#cellSide = ~~(this.#canvas.width / NUM_ROWS_COLS);
@@ -126,23 +148,32 @@ class DoodleManager {
       return;
     }
 
-    this.#state = State.DRAWING;
+    if (this.#state === State.DRAWING_RECTANGLE) {
+      [this.#rectStartX, this.#rectStartY] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
+      return;
+    } else if (this.#state === State.HOVERING) {
+      this.#state = State.DRAWING_PENCIL;
 
-    const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
-    this.#drawPixel(x, y);
-  }
-
-  #mouseUp() {
-    this.#state = State.HOVERING;
-
-    if (this.#mouseInsideCanvas()) {
       const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
       this.#drawPixel(x, y);
     }
   }
 
+  #mouseUp() {
+    if (this.#mouseInsideCanvas()) {
+      const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
+      if (this.#state === State.DRAWING_RECTANGLE) {
+        this.#drawRectangle(this.#rectStartX, this.#rectStartY, x, y);
+      } else if (this.#state === State.DRAWING_PENCIL) {
+        this.#drawPixel(x, y);
+      }
+    }
+    // TODO: handle mouseUp on tool buttons
+    this.#state = State.HOVERING;
+  }
+
   #mouseMove() {
-    if (this.#state === State.DRAWING) {
+    if (this.#state === State.DRAWING_PENCIL) {
       const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
       const [px, py] = this.#getCanvasCells(this.#pmouseX, this.#pmouseY);
       this.#drawLine(px, py, x, y);
@@ -199,6 +230,32 @@ class DoodleManager {
 
     const index = y * NUM_ROWS_COLS + x;
     this.#drawing[index] = this.#currColorIndex.toString(16);
+  }
+
+  #drawRectangle(x1, y1, x2, y2) {
+    if (
+      x1 < 0 ||
+      y1 < 0 ||
+      x2 < 0 ||
+      y2 < 0 ||
+      x1 >= NUM_ROWS_COLS ||
+      y1 >= NUM_ROWS_COLS ||
+      x2 >= NUM_ROWS_COLS ||
+      y2 >= NUM_ROWS_COLS
+    ) {
+      return;
+    }
+
+    const minX = Math.min(x1, x2);
+    const minY = Math.min(y1, y2);
+    const maxX = Math.max(x1, x2);
+    const maxY = Math.max(y1, y2);
+
+    for (let x = minX; x < maxX; x++) {
+      for (let y = minY; y <= maxY; y++) {
+        this.#drawPixel(x, y);
+      }
+    }
   }
 
   #mouseInsideCanvas() {
