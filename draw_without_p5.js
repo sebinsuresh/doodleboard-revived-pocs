@@ -138,15 +138,6 @@ class DoodleManager {
     if (this.#mouseInsideCanvas()) {
       const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
       this.#drawPixel(x, y);
-
-      // TODO: DEBUG - Remove
-      const backup = this.#currColorIndex;
-      this.#currColorIndex = 3;
-      this.#drawLine(x, y, 30, 25);
-      this.#currColorIndex = 2;
-      this.#drawPixel(x, y);
-      this.#drawPixel(30, 25);
-      this.#currColorIndex = backup;
     }
   }
 
@@ -155,8 +146,6 @@ class DoodleManager {
       const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
       const [px, py] = this.#getCanvasCells(this.#pmouseX, this.#pmouseY);
       this.#drawLine(px, py, x, y);
-
-      // this.#drawLineWithPixels(this.#pmouseX, this.#pmouseY, this.#mouseX, this.#mouseY);
     }
   }
 
@@ -167,10 +156,6 @@ class DoodleManager {
    * @param {number} y2
    */
   #drawLine(x1, y1, x2, y2) {
-    // TODO: this is broken
-
-    console.log(`(${x1}, ${y1}) to (${x2}, ${y2})`);
-
     let nDivs = 0;
     let xDiff = Math.abs(x1 - x2);
     let yDiff = Math.abs(y1 - y2);
@@ -179,10 +164,10 @@ class DoodleManager {
 
     if (xDiff > yDiff) {
       nDivs = xDiff;
-      ySep = Math.round(yDiff / nDivs);
+      ySep = yDiff / nDivs;
     } else {
       nDivs = yDiff;
-      xSep = Math.round(xDiff / nDivs);
+      xSep = xDiff / nDivs;
     }
 
     if (x1 > x2) {
@@ -192,59 +177,14 @@ class DoodleManager {
       ySep *= -1;
     }
 
-    console.log(nDivs, xDiff, yDiff);
     if (nDivs > 0) {
       for (let i = 0; i <= nDivs; i++) {
-        let nx = x1 + i * xSep;
-        let ny = y1 + i * ySep;
+        let nx = ~~(x1 + i * xSep);
+        let ny = ~~(y1 + i * ySep);
         this.#drawPixel(nx, ny);
       }
     } else {
       this.#drawPixel(x1, y1);
-    }
-  }
-
-  /**
-   * @param {number} x1
-   * @param {number} y1
-   * @param {number} x2
-   * @param {number} y2
-   */
-  #drawLineWithPixels(x1, y1, x2, y2) {
-    const side = this.#cellSide;
-
-    let nDivs, xSep, ySep;
-    let xDiff = Math.abs(x1 - x2);
-    let yDiff = Math.abs(y1 - y2);
-
-    if (xDiff > yDiff) {
-      nDivs = xDiff / side;
-      xSep = side;
-      ySep = yDiff / nDivs;
-    } else {
-      nDivs = yDiff / side;
-      xSep = xDiff / nDivs;
-      ySep = side;
-    }
-
-    if (x1 > x2) {
-      xSep *= -1;
-    }
-    if (y1 > y2) {
-      ySep *= -1;
-    }
-
-    if (nDivs > 0) {
-      for (let i = 0; i <= nDivs; i++) {
-        let nx = x1 + i * xSep;
-        let ny = y1 + i * ySep;
-
-        let [x, y] = this.#getCanvasCells(nx, ny);
-        this.#drawPixel(x, y);
-      }
-    } else {
-      const [x, y] = this.#getCanvasCells(x1, y1);
-      this.#drawPixel(x, y);
     }
   }
 
