@@ -23,7 +23,7 @@ const LOOKUP_CODE = 'd';
 const LOOKUP_ITEM_SEP = 'e';
 const LOOKUP_SEP = 'f';
 
-console.log('original', testDrawingUncompressed.length, testDrawingUncompressed);
+/* console.log('original', testDrawingUncompressed.length, testDrawingUncompressed);
 const compressedV1 = compressV1(testDrawingUncompressed);
 console.log('v1', compressedV1.length, compressedV1);
 
@@ -45,7 +45,7 @@ console.log('decompress: v3 -> original:', testDrawingUncompressed === decompres
 console.log(
   'using decompressV3 on v2 compressed string:',
   testDrawingUncompressed === decompressV3(compressedV2),
-);
+); */
 
 // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 4, 20));
 // console.log(getCountOfStringsOfLength(testDrawingUncompressed, 5, -1));
