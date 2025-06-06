@@ -2,6 +2,7 @@ const State = {
   HOVERING: 0,
   DRAWING_PENCIL: 1,
   DRAWING_RECTANGLE: 2,
+  PICKING_FILL_START: 3,
 };
 
 const Tools = {
@@ -85,6 +86,13 @@ class DoodleManager {
     });
     toolContainer.appendChild(rectButton);
 
+    const fillButton = document.createElement('button');
+    fillButton.textContent = 'Fill';
+    fillButton.addEventListener('click', () => {
+      this.#currentTool = Tools.FILL;
+    });
+    toolContainer.appendChild(fillButton);
+
     const clearButton = document.createElement('button');
     clearButton.textContent = 'Clear';
     clearButton.addEventListener('click', () => {
@@ -131,6 +139,9 @@ class DoodleManager {
     this.#renderDrawing();
     this.#drawPreview();
     this.#drawCursor();
+
+    // TODO: Remove - DEBUG
+    // console.log(Object.keys(State)[this.#state], Object.keys(Tools)[this.#currentTool]);
   }
 
   #renderDrawing() {
@@ -181,6 +192,8 @@ class DoodleManager {
       this.#drawPixel(x, y);
 
       this.#state = State.DRAWING_PENCIL;
+    } else if (this.#currentTool === Tools.FILL) {
+      this.#state = State.PICKING_FILL_START;
     }
   }
 
@@ -190,8 +203,12 @@ class DoodleManager {
     y = this.#clamp(y, 0, NUM_ROWS_COLS - 1);
     if (this.#state === State.DRAWING_RECTANGLE) {
       this.#drawRectangle(this.#rectStartX, this.#rectStartY, x, y);
-    } else if (this.#mouseInsideCanvas() && this.#state === State.DRAWING_PENCIL) {
-      this.#drawPixel(x, y);
+    } else if (this.#mouseInsideCanvas()) {
+      if (this.#state === State.DRAWING_PENCIL) {
+        this.#drawPixel(x, y);
+      } else if (this.#state === State.PICKING_FILL_START) {
+        this.#fillAt(x, y);
+      }
     }
 
     this.#previewFunc = undefined;
@@ -299,6 +316,36 @@ class DoodleManager {
       for (let y = minY; y <= maxY; y++) {
         this.#drawPixel(x, y);
       }
+    }
+  }
+
+  // TODO: implement this
+  /**
+   * @param {number} x
+   * @param {number} y
+   */
+  #fillAt(x, y) {
+    const index = y * NUM_ROWS_COLS + x;
+    const startColor = this.#drawing[index];
+    // TODO: need to consider x, y otherwise fill will bleed to other side of drawing
+    const toVisit = [
+      index - NUM_ROWS_COLS, // up
+      index - 1, // left
+      index + 1, // right
+      index + NUM_ROWS_COLS, // down
+    ];
+
+    const visited = new Array(this.#drawing.length);
+    visited.fill(false);
+    visited[index] = true;
+
+    while (toVisit.length) {
+      const visitingIndex = toVisit.pop();
+      if (visited[visitingIndex] === true || index < 0 || index >= this.#drawing.length) {
+        continue;
+      }
+
+      visited[visitingIndex] = true;
     }
   }
 
