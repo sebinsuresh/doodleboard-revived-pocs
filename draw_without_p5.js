@@ -4,6 +4,13 @@ const State = {
   DRAWING_RECTANGLE: 2,
 };
 
+const Tools = {
+  PENCIL: 0,
+  RECTANGLE: 1,
+  FILL: 2,
+  LINE: 3,
+};
+
 class DoodleManager {
   #container;
   #canvas;
@@ -19,6 +26,9 @@ class DoodleManager {
   #mouseIsPressed = false;
   #rectStartX;
   #rectStartY;
+  #currentTool = Tools.PENCIL;
+  /** @type {() => void | undefined} */
+  #previewFunc;
 
   /**
    * @param {string} containerId
@@ -49,24 +59,7 @@ class DoodleManager {
       swatch.style.backgroundColor = palette[i];
     }
 
-    const toolContainer = document.createElement('div');
-    this.#container.appendChild(toolContainer);
-
-    const clearButton = document.createElement('button');
-    clearButton.textContent = 'Clear';
-    clearButton.addEventListener('click', () => {
-      this.#drawing.fill('b');
-    });
-    toolContainer.appendChild(clearButton);
-
-    const rectButton = document.createElement('button');
-    rectButton.textContent = 'Rectangle';
-    rectButton.addEventListener('click', () => {
-      if (this.#mouseInsideCanvas()) {
-        this.#state = State.DRAWING_RECTANGLE;
-      }
-    });
-    toolContainer.appendChild(rectButton);
+    this.#createTools();
 
     this.#drawing = initialDrawing.split('');
     this.#cellSide = ~~(this.#canvas.width / NUM_ROWS_COLS);
@@ -74,8 +67,34 @@ class DoodleManager {
     this.#addEventListeners();
   }
 
+  #createTools() {
+    const toolContainer = document.createElement('div');
+    this.#container.appendChild(toolContainer);
+
+    const pencilButton = document.createElement('button');
+    pencilButton.textContent = 'Pencil';
+    pencilButton.addEventListener('click', () => {
+      this.#currentTool = Tools.PENCIL;
+    });
+    toolContainer.appendChild(pencilButton);
+
+    const rectButton = document.createElement('button');
+    rectButton.textContent = 'Rectangle';
+    rectButton.addEventListener('click', () => {
+      this.#currentTool = Tools.RECTANGLE;
+    });
+    toolContainer.appendChild(rectButton);
+
+    const clearButton = document.createElement('button');
+    clearButton.textContent = 'Clear';
+    clearButton.addEventListener('click', () => {
+      this.#drawing.fill('b');
+    });
+    toolContainer.appendChild(clearButton);
+  }
+
   #addEventListeners() {
-    this.#container.addEventListener('mousemove', (evt) => {
+    document.addEventListener('mousemove', (evt) => {
       this.#updateMousePosition(evt);
       this.#mouseMove();
     });
@@ -110,6 +129,7 @@ class DoodleManager {
   #draw() {
     this.#ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
     this.#renderDrawing();
+    this.#drawPreview();
     this.#drawCursor();
   }
 
@@ -121,6 +141,10 @@ class DoodleManager {
       this.#ctx.fillStyle = palette[parseInt(this.#drawing[i], 16)];
       this.#ctx.fillRect(row * this.#cellSide, col * this.#cellSide, this.#cellSide, this.#cellSide);
     }
+  }
+
+  #drawPreview() {
+    this.#previewFunc?.call(this);
   }
 
   #drawCursor() {
@@ -148,27 +172,29 @@ class DoodleManager {
       return;
     }
 
-    if (this.#state === State.DRAWING_RECTANGLE) {
+    if (this.#currentTool === Tools.RECTANGLE) {
       [this.#rectStartX, this.#rectStartY] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
-      return;
-    } else if (this.#state === State.HOVERING) {
-      this.#state = State.DRAWING_PENCIL;
 
+      this.#state = State.DRAWING_RECTANGLE;
+    } else if (this.#currentTool === Tools.PENCIL) {
       const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
       this.#drawPixel(x, y);
+
+      this.#state = State.DRAWING_PENCIL;
     }
   }
 
   #mouseUp() {
-    if (this.#mouseInsideCanvas()) {
-      const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
-      if (this.#state === State.DRAWING_RECTANGLE) {
-        this.#drawRectangle(this.#rectStartX, this.#rectStartY, x, y);
-      } else if (this.#state === State.DRAWING_PENCIL) {
-        this.#drawPixel(x, y);
-      }
+    let [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
+    x = this.#clamp(x, 0, NUM_ROWS_COLS - 1);
+    y = this.#clamp(y, 0, NUM_ROWS_COLS - 1);
+    if (this.#state === State.DRAWING_RECTANGLE) {
+      this.#drawRectangle(this.#rectStartX, this.#rectStartY, x, y);
+    } else if (this.#mouseInsideCanvas() && this.#state === State.DRAWING_PENCIL) {
+      this.#drawPixel(x, y);
     }
-    // TODO: handle mouseUp on tool buttons
+
+    this.#previewFunc = undefined;
     this.#state = State.HOVERING;
   }
 
@@ -177,6 +203,18 @@ class DoodleManager {
       const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
       const [px, py] = this.#getCanvasCells(this.#pmouseX, this.#pmouseY);
       this.#drawLine(px, py, x, y);
+    } else if (this.#state === State.DRAWING_RECTANGLE) {
+      const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
+
+      this.#previewFunc = () => {
+        this.#ctx.fillStyle = palette[this.#currColorIndex];
+        this.#ctx.fillRect(
+          Math.min(this.#rectStartX, x) * this.#cellSide,
+          Math.min(this.#rectStartY, y) * this.#cellSide,
+          (1 + Math.abs(x - this.#rectStartX)) * this.#cellSide,
+          (1 + Math.abs(y - this.#rectStartY)) * this.#cellSide,
+        );
+      };
     }
   }
 
@@ -232,26 +270,32 @@ class DoodleManager {
     this.#drawing[index] = this.#currColorIndex.toString(16);
   }
 
-  #drawRectangle(x1, y1, x2, y2) {
+  /**
+   * @param {number} x1
+   * @param {number} y1
+   * @param {number} x3
+   * @param {number} y3
+   */
+  #drawRectangle(x1, y1, x3, y3) {
     if (
       x1 < 0 ||
       y1 < 0 ||
-      x2 < 0 ||
-      y2 < 0 ||
+      x3 < 0 ||
+      y3 < 0 ||
       x1 >= NUM_ROWS_COLS ||
       y1 >= NUM_ROWS_COLS ||
-      x2 >= NUM_ROWS_COLS ||
-      y2 >= NUM_ROWS_COLS
+      x3 >= NUM_ROWS_COLS ||
+      y3 >= NUM_ROWS_COLS
     ) {
       return;
     }
 
-    const minX = Math.min(x1, x2);
-    const minY = Math.min(y1, y2);
-    const maxX = Math.max(x1, x2);
-    const maxY = Math.max(y1, y2);
+    const minX = Math.min(x1, x3);
+    const minY = Math.min(y1, y3);
+    const maxX = Math.max(x1, x3);
+    const maxY = Math.max(y1, y3);
 
-    for (let x = minX; x < maxX; x++) {
+    for (let x = minX; x <= maxX; x++) {
       for (let y = minY; y <= maxY; y++) {
         this.#drawPixel(x, y);
       }
@@ -264,6 +308,15 @@ class DoodleManager {
 
   #pointInsideCanvas(x, y) {
     return x > 0 && y > 0 && x < this.#canvas.width && y < this.#canvas.height;
+  }
+
+  /**
+   * @param {number} number
+   * @param {number} min
+   * @param {number} max
+   */
+  #clamp(number, min, max) {
+    return number < min ? min : number > max ? max : number;
   }
 }
 
