@@ -5,13 +5,6 @@ const State = {
   PICKING_FILL_START: 3,
 };
 
-const Tools = {
-  PENCIL: 0,
-  RECTANGLE: 1,
-  FILL: 2,
-  LINE: 3,
-};
-
 class DoodleManager {
   #container;
   #canvas;
@@ -29,7 +22,9 @@ class DoodleManager {
   #rectStartY;
 
   #state = State.HOVERING;
-  #currentTool = Tools.PENCIL;
+
+  /** @type {ToolManager} */
+  #toolMgr;
 
   /** @type {() => void | undefined} */
   #previewFunc;
@@ -63,48 +58,21 @@ class DoodleManager {
       swatch.style.backgroundColor = palette[i];
     }
 
-    this.#createTools();
-
     this.#drawing = initialDrawing.split('');
     this.#cellSide = ~~(this.#canvas.width / NUM_ROWS_COLS);
 
-    this.#addEventListeners();
+    this.#createTools();
+    this.#addInputListeners();
   }
 
   #createTools() {
     const toolContainer = document.createElement('div');
     this.#container.appendChild(toolContainer);
 
-    const pencilButton = document.createElement('button');
-    pencilButton.textContent = 'Pencil';
-    pencilButton.addEventListener('click', () => {
-      this.#currentTool = Tools.PENCIL;
-    });
-    toolContainer.appendChild(pencilButton);
-
-    const rectButton = document.createElement('button');
-    rectButton.textContent = 'Rectangle';
-    rectButton.addEventListener('click', () => {
-      this.#currentTool = Tools.RECTANGLE;
-    });
-    toolContainer.appendChild(rectButton);
-
-    const fillButton = document.createElement('button');
-    fillButton.textContent = 'Fill';
-    fillButton.addEventListener('click', () => {
-      this.#currentTool = Tools.FILL;
-    });
-    toolContainer.appendChild(fillButton);
-
-    const clearButton = document.createElement('button');
-    clearButton.textContent = 'Clear';
-    clearButton.addEventListener('click', () => {
-      this.#drawing.fill('b');
-    });
-    toolContainer.appendChild(clearButton);
+    this.#toolMgr = new ToolManager(toolContainer, this.#drawing);
   }
 
-  #addEventListeners() {
+  #addInputListeners() {
     document.addEventListener('mousemove', (evt) => {
       this.#updateMousePosition(evt);
       this.#inputMove();
@@ -144,7 +112,7 @@ class DoodleManager {
     this.#drawCursor();
 
     // TODO: Remove - DEBUG
-    // console.log(Object.keys(State)[this.#state], Object.keys(Tools)[this.#currentTool]);
+    // console.log(Object.keys(State)[this.#state], Object.keys(Tools)[this.#toolMgr.activeToolId]);
   }
 
   #renderDrawing() {
@@ -186,16 +154,16 @@ class DoodleManager {
       return;
     }
 
-    if (this.#currentTool === Tools.RECTANGLE) {
+    if (this.#toolMgr.activeToolId === Tools.RECTANGLE) {
       [this.#rectStartX, this.#rectStartY] = this.#getCanvasCells(this.#inputX, this.#inputY);
 
       this.#state = State.DRAWING_RECTANGLE;
-    } else if (this.#currentTool === Tools.PENCIL) {
+    } else if (this.#toolMgr.activeToolId === Tools.PENCIL) {
       const [x, y] = this.#getCanvasCells(this.#inputX, this.#inputY);
       this.#drawPixel(x, y);
 
       this.#state = State.DRAWING_PENCIL;
-    } else if (this.#currentTool === Tools.FILL) {
+    } else if (this.#toolMgr.activeToolId === Tools.FILL) {
       this.#state = State.PICKING_FILL_START;
     }
   }
