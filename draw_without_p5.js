@@ -19,15 +19,18 @@ class DoodleManager {
   #drawing;
   #currColorIndex = 0;
   #cellSide;
-  #mouseX = 0;
-  #mouseY = 0;
-  #pmouseX = 0;
-  #pmouseY = 0;
-  #state = State.HOVERING;
+  #inputX = 0;
+  #inputY = 0;
+  #pInputX = 0;
+  #pInputY = 0;
   #mouseIsPressed = false;
+
   #rectStartX;
   #rectStartY;
+
+  #state = State.HOVERING;
   #currentTool = Tools.PENCIL;
+
   /** @type {() => void | undefined} */
   #previewFunc;
 
@@ -104,26 +107,26 @@ class DoodleManager {
   #addEventListeners() {
     document.addEventListener('mousemove', (evt) => {
       this.#updateMousePosition(evt);
-      this.#mouseMove();
+      this.#inputMove();
     });
 
     document.addEventListener('mousedown', (evt) => {
       this.#updateMousePosition(evt);
-      this.#mouseDown();
+      this.#inputDown();
     });
 
     document.addEventListener('mouseup', (evt) => {
       this.#updateMousePosition(evt);
-      this.#mouseUp();
+      this.#inputUp();
     });
   }
 
   #updateMousePosition(evt) {
-    this.#pmouseX = this.#mouseX;
-    this.#pmouseY = this.#mouseY;
+    this.#pInputX = this.#inputX;
+    this.#pInputY = this.#inputY;
 
-    this.#mouseX = evt.x - Math.round(this.#canvas.getBoundingClientRect().left);
-    this.#mouseY = evt.y - Math.round(this.#canvas.getBoundingClientRect().top);
+    this.#inputX = evt.x - Math.round(this.#canvas.getBoundingClientRect().left);
+    this.#inputY = evt.y - Math.round(this.#canvas.getBoundingClientRect().top);
 
     // TODO: verify this works on old iOS & normal devices
     this.#mouseIsPressed = !!(evt.buttons || evt.which);
@@ -159,14 +162,14 @@ class DoodleManager {
   }
 
   #drawCursor() {
-    if (!this.#mouseInsideCanvas()) {
+    if (!this.#inputInsideCanvas()) {
       return;
     }
 
     this.#ctx.fillStyle = palette[this.#currColorIndex];
     this.#ctx.strokeStyle = '#333';
 
-    const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
+    const [x, y] = this.#getCanvasCells(this.#inputX, this.#inputY);
     this.#ctx.fillRect(this.#cellSide * x, this.#cellSide * y, this.#cellSide, this.#cellSide);
   }
 
@@ -178,17 +181,17 @@ class DoodleManager {
     return [~~(x / this.#cellSide), ~~(y / this.#cellSide)];
   }
 
-  #mouseDown() {
-    if (!this.#mouseInsideCanvas()) {
+  #inputDown() {
+    if (!this.#inputInsideCanvas()) {
       return;
     }
 
     if (this.#currentTool === Tools.RECTANGLE) {
-      [this.#rectStartX, this.#rectStartY] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
+      [this.#rectStartX, this.#rectStartY] = this.#getCanvasCells(this.#inputX, this.#inputY);
 
       this.#state = State.DRAWING_RECTANGLE;
     } else if (this.#currentTool === Tools.PENCIL) {
-      const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
+      const [x, y] = this.#getCanvasCells(this.#inputX, this.#inputY);
       this.#drawPixel(x, y);
 
       this.#state = State.DRAWING_PENCIL;
@@ -197,13 +200,13 @@ class DoodleManager {
     }
   }
 
-  #mouseUp() {
-    let [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
+  #inputUp() {
+    let [x, y] = this.#getCanvasCells(this.#inputX, this.#inputY);
     x = this.#clamp(x, 0, NUM_ROWS_COLS - 1);
     y = this.#clamp(y, 0, NUM_ROWS_COLS - 1);
     if (this.#state === State.DRAWING_RECTANGLE) {
       this.#drawRectangle(this.#rectStartX, this.#rectStartY, x, y);
-    } else if (this.#mouseInsideCanvas()) {
+    } else if (this.#inputInsideCanvas()) {
       if (this.#state === State.DRAWING_PENCIL) {
         this.#drawPixel(x, y);
       } else if (this.#state === State.PICKING_FILL_START) {
@@ -215,13 +218,13 @@ class DoodleManager {
     this.#state = State.HOVERING;
   }
 
-  #mouseMove() {
+  #inputMove() {
     if (this.#state === State.DRAWING_PENCIL) {
-      const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
-      const [px, py] = this.#getCanvasCells(this.#pmouseX, this.#pmouseY);
+      const [x, y] = this.#getCanvasCells(this.#inputX, this.#inputY);
+      const [px, py] = this.#getCanvasCells(this.#pInputX, this.#pInputY);
       this.#drawLine(px, py, x, y);
     } else if (this.#state === State.DRAWING_RECTANGLE) {
-      const [x, y] = this.#getCanvasCells(this.#mouseX, this.#mouseY);
+      const [x, y] = this.#getCanvasCells(this.#inputX, this.#inputY);
 
       this.#previewFunc = () => {
         this.#ctx.fillStyle = palette[this.#currColorIndex];
@@ -402,8 +405,8 @@ class DoodleManager {
     }
   }
 
-  #mouseInsideCanvas() {
-    return this.#pointInsideCanvas(this.#mouseX, this.#mouseY);
+  #inputInsideCanvas() {
+    return this.#pointInsideCanvas(this.#inputX, this.#inputY);
   }
 
   #pointInsideCanvas(x, y) {
