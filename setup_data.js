@@ -16,7 +16,7 @@ const palette = [
 
 // pattern:
 // const testDrawingUncompressed = ('0123456789ab'.repeat(5) + '0123').repeat(64);
-const testDrawingUncompressed = '4'.repeat(4096);
+const testDrawingUncompressed = 'b'.repeat(4096);
 
 // doodle from old project:
 // const testDrawingUncompressed =
