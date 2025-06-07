@@ -328,7 +328,14 @@ class DoodleManager {
       const vy = ~~(visitingIndex / NUM_ROWS_COLS);
       this.#drawPixel(vx, vy);
       this.#fillVisited[visitingIndex] = true;
-      this.#pushAdjacentIndices(vx, vy, toVisit, this.#fillVisited, this.#fillMarkedForVisit, startColor);
+      this.#pushValidAdjacentIndices(
+        vx,
+        vy,
+        toVisit,
+        this.#fillVisited,
+        this.#fillMarkedForVisit,
+        startColor,
+      );
     }
 
     // console.log(`iterated ${infLoopPreventCount} times`);
@@ -343,7 +350,7 @@ class DoodleManager {
    * @param {boolean[]} markedIndices
    * @param {string} startColor
    */
-  #pushAdjacentIndices(x, y, toVisit, visited, markedIndices, startColor) {
+  #pushValidAdjacentIndices(x, y, toVisit, visited, markedIndices, startColor) {
     this.#adjIndices[0] = this.#adjIndices[1] = this.#adjIndices[2] = this.#adjIndices[3] = -1;
 
     if (x - 1 >= 0) {
