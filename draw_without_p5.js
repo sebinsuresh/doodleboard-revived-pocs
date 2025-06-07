@@ -319,33 +319,86 @@ class DoodleManager {
     }
   }
 
-  // TODO: implement this
+  /** @type {boolean[] | undefined} */
+  #fillVisited = undefined;
+  /** @type {boolean[] | undefined} */
+  #fillMarkedForVisit = undefined;
+
   /**
    * @param {number} x
    * @param {number} y
    */
   #fillAt(x, y) {
+    let infLoopPreventCount = 0;
     const index = y * NUM_ROWS_COLS + x;
     const startColor = this.#drawing[index];
-    // TODO: need to consider x, y otherwise fill will bleed to other side of drawing
-    const toVisit = [
-      index - NUM_ROWS_COLS, // up
-      index - 1, // left
-      index + 1, // right
-      index + NUM_ROWS_COLS, // down
-    ];
 
-    const visited = new Array(this.#drawing.length);
-    visited.fill(false);
-    visited[index] = true;
+    this.#fillVisited ??= new Array(this.#drawing.length);
+    this.#fillVisited.fill(false);
+    this.#fillMarkedForVisit ??= new Array(this.#drawing.length);
+    this.#fillMarkedForVisit.fill(false);
+
+    /** @type {number[]} */
+    const toVisit = [index];
+    this.#fillMarkedForVisit[index] = true;
 
     while (toVisit.length) {
-      const visitingIndex = toVisit.pop();
-      if (visited[visitingIndex] === true || index < 0 || index >= this.#drawing.length) {
-        continue;
+      infLoopPreventCount++;
+      if (infLoopPreventCount > 5000) {
+        console.error('fill tool iterating over 5000 times');
+        break;
       }
 
-      visited[visitingIndex] = true;
+      const visitingIndex = toVisit.pop();
+      if (this.#fillVisited[visitingIndex] === true) {
+        continue;
+      }
+      const vx = visitingIndex % NUM_ROWS_COLS;
+      const vy = ~~(visitingIndex / NUM_ROWS_COLS);
+      this.#drawPixel(vx, vy);
+      this.#fillVisited[visitingIndex] = true;
+      this.#pushAdjacentIndices(vx, vy, toVisit, this.#fillVisited, this.#fillMarkedForVisit, startColor);
+    }
+
+    // console.log(`iterated ${infLoopPreventCount} times`);
+  }
+
+  #adjIndices = [-1, -1, -1, -1];
+  /**
+   * @param {number} x
+   * @param {number} y
+   * @param {number[]} toVisit
+   * @param {boolean[]} visited
+   * @param {boolean[]} markedIndices
+   * @param {string} startColor
+   */
+  #pushAdjacentIndices(x, y, toVisit, visited, markedIndices, startColor) {
+    this.#adjIndices[0] = this.#adjIndices[1] = this.#adjIndices[2] = this.#adjIndices[3] = -1;
+
+    if (x - 1 >= 0) {
+      this.#adjIndices[0] = y * NUM_ROWS_COLS + x - 1;
+    }
+    if (x + 1 < NUM_ROWS_COLS) {
+      this.#adjIndices[1] = y * NUM_ROWS_COLS + x + 1;
+    }
+    if (y - 1 >= 0) {
+      this.#adjIndices[2] = (y - 1) * NUM_ROWS_COLS + x;
+    }
+    if (y + 1 < NUM_ROWS_COLS) {
+      this.#adjIndices[3] = (y + 1) * NUM_ROWS_COLS + x;
+    }
+
+    for (let adjIndex of this.#adjIndices) {
+      if (adjIndex < 0) continue;
+
+      if (
+        this.#drawing[adjIndex] === startColor &&
+        visited[adjIndex] === false &&
+        markedIndices[adjIndex] === false
+      ) {
+        toVisit.push(adjIndex);
+        markedIndices[adjIndex] = true;
+      }
     }
   }
 
