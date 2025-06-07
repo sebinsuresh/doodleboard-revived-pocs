@@ -9,11 +9,11 @@ const NUM_ROWS_COLS = 64;
 
 // pattern:
 // const testDrawingUncompressed = ('0123456789ab'.repeat(5) + '0123').repeat(64);
-const testDrawingUncompressed = 'b'.repeat(4096);
+// const testDrawingUncompressed = 'b'.repeat(4096);
 
 // doodle from old project:
-// const testDrawingUncompressed =
-//   'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb88888bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb800000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0055111100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0555111100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb05555088081111000000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0011110008000000008118000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0111111000001111000811100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010000010111111110081180bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010001010000111111001000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00000111111000110018010bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb000000158551100011011081100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb011000011188110101101100100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0501000011111100011101100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb05100400011111110101100100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010003330001100101111101100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010014344000000000100100110bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0100134444400010000100101110bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0000b000044400000000010001000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0144404044440001010000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0100000040000344000000b0bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0157704045770333000100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0144404044440334000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00004440000443100000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb14444444444444000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb11433344444440000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1443344444430000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1444442444430000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb142224444300000100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb144444443300111111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1144433330111331111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb100333301113333111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00333111111333111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb11011113311130000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb13111133311100088880bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1131111333110000088800bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1331111333100000000880bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1331111000000000000880bbbbbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbb1311111000000000000800bbbbbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbb13111100000000000008000bbbbbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbb11100000000000000008880bbbbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000008880bbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbbbbbb0010000000000000888080bbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbbb00000023300000008800808bbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbbbb000000232000000000088080000080111b000bbbbbbbbbbbbbbbbbbbbbbbbbbb00000033200000000008088888800044400bbbbbbbbbbbbbbbbbbbbbbbbbbbb000000030000000000000000080001444000bbbbbbbbbbbbbbbbbbbbbbbbbbb00000000000000000000000000000114440014bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000000144111114bbbbbbbbbbbbbbbbbbbbbbbbbb00000000000000000000000000000144144444bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000001444114444bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000001444411111bbbb';
+const testDrawingUncompressed =
+  'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb88888bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb800000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0055111100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0555111100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb05555088081111000000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0011110008000000008118000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0111111000001111000811100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010000010111111110081180bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010001010000111111001000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00000111111000110018010bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb000000158551100011011081100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb011000011188110101101100100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0501000011111100011101100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb05100400011111110101100100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010003330001100101111101100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb010014344000000000100100110bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0100134444400010000100101110bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0000b000044400000000010001000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0144404044440001010000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0100000040000344000000b0bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0157704045770333000100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0144404044440334000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00004440000443100000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb14444444444444000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb11433344444440000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1443344444430000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1444442444430000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb142224444300000100bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb144444443300111111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1144433330111331111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb100333301113333111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00333111111333111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb11011113311130000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb13111133311100088880bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1131111333110000088800bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1331111333100000000880bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1331111000000000000880bbbbbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbb1311111000000000000800bbbbbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbb13111100000000000008000bbbbbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbb11100000000000000008880bbbbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000008880bbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbbbbbb0010000000000000888080bbbbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbbb00000023300000008800808bbbbbbbbbbbb00bbbbbbbbbbbbbbbbbbbbbbbbbbb000000232000000000088080000080111b000bbbbbbbbbbbbbbbbbbbbbbbbbbb00000033200000000008088888800044400bbbbbbbbbbbbbbbbbbbbbbbbbbbb000000030000000000000000080001444000bbbbbbbbbbbbbbbbbbbbbbbbbbb00000000000000000000000000000114440014bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000000144111114bbbbbbbbbbbbbbbbbbbbbbbbbb00000000000000000000000000000144144444bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000001444114444bbbbbbbbbbbbbbbbbbbbbbbbb000000000000000000000000000001444411111bbbb';
 
 class DoodleManager {
   #container;
@@ -36,6 +36,8 @@ class DoodleManager {
   #toolMgr;
   /** @type {PaletteManager} */
   #paletteMgr;
+  /** @type {Renderer} */
+  #renderer;
 
   /** @type {() => void | undefined} */
   #previewFunc;
@@ -58,6 +60,8 @@ class DoodleManager {
     this.#drawing = initialDrawing.split('');
     this.#cellSide = ~~(this.#canvas.width / NUM_ROWS_COLS);
 
+    this.#renderer = new Renderer(this.#drawing, this.#canvas, this.#ctx, this.#paletteMgr);
+
     this.#createTools();
     this.#addInputListeners();
   }
@@ -66,7 +70,7 @@ class DoodleManager {
     const toolContainer = document.createElement('div');
     this.#container.appendChild(toolContainer);
 
-    this.#toolMgr = new ToolManager(toolContainer, this.#drawing);
+    this.#toolMgr = new ToolManager(toolContainer, this.#drawing, this.#renderer);
   }
 
   #addInputListeners() {
@@ -103,23 +107,12 @@ class DoodleManager {
   }
 
   #draw() {
-    this.#ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
-    this.#renderDrawing();
+    this.#renderer.draw();
     this.#drawPreview();
     this.#drawCursor();
 
     // TODO: Remove - DEBUG
     // console.log(Object.keys(State)[this.#state], Object.keys(Tools)[this.#toolMgr.activeToolId]);
-  }
-
-  #renderDrawing() {
-    this.#ctx.strokeStyle = null;
-    for (let i = 0; i < this.#drawing.length; i++) {
-      const row = ~~(i % NUM_ROWS_COLS);
-      const col = ~~(i / NUM_ROWS_COLS);
-      this.#ctx.fillStyle = this.#paletteMgr.getColorFromDrawingChar(this.#drawing[i]);
-      this.#ctx.fillRect(row * this.#cellSide, col * this.#cellSide, this.#cellSide, this.#cellSide);
-    }
   }
 
   #drawPreview() {
@@ -131,11 +124,8 @@ class DoodleManager {
       return;
     }
 
-    this.#ctx.fillStyle = this.#paletteMgr.getCurrentColor();
-    this.#ctx.strokeStyle = '#333';
-
     const [x, y] = this.#getCanvasCells(this.#inputX, this.#inputY);
-    this.#ctx.fillRect(this.#cellSide * x, this.#cellSide * y, this.#cellSide, this.#cellSide);
+    this.#renderer.previewPixel(x, y);
   }
 
   /**
@@ -157,7 +147,7 @@ class DoodleManager {
       this.#state = State.DRAWING_RECTANGLE;
     } else if (this.#toolMgr.activeToolId === Tools.PENCIL) {
       const [x, y] = this.#getCanvasCells(this.#inputX, this.#inputY);
-      this.#drawPixel(x, y);
+      this.#renderer.drawPixel(x, y);
 
       this.#state = State.DRAWING_PENCIL;
     } else if (this.#toolMgr.activeToolId === Tools.FILL) {
@@ -170,10 +160,10 @@ class DoodleManager {
     x = this.#clamp(x, 0, NUM_ROWS_COLS - 1);
     y = this.#clamp(y, 0, NUM_ROWS_COLS - 1);
     if (this.#state === State.DRAWING_RECTANGLE) {
-      this.#drawRectangle(this.#rectStartX, this.#rectStartY, x, y);
+      this.#renderer.drawRectangle(this.#rectStartX, this.#rectStartY, x, y);
     } else if (this.#inputInsideCanvas()) {
       if (this.#state === State.DRAWING_PENCIL) {
-        this.#drawPixel(x, y);
+        this.#renderer.drawPixel(x, y);
       } else if (this.#state === State.PICKING_FILL_START) {
         this.#fillAt(x, y);
       }
@@ -187,103 +177,13 @@ class DoodleManager {
     if (this.#state === State.DRAWING_PENCIL) {
       const [x, y] = this.#getCanvasCells(this.#inputX, this.#inputY);
       const [px, py] = this.#getCanvasCells(this.#pInputX, this.#pInputY);
-      this.#drawLine(px, py, x, y);
+      this.#renderer.drawLine(px, py, x, y);
     } else if (this.#state === State.DRAWING_RECTANGLE) {
       const [x, y] = this.#getCanvasCells(this.#inputX, this.#inputY);
 
       this.#previewFunc = () => {
-        this.#ctx.fillStyle = this.#paletteMgr.getCurrentColor();
-        this.#ctx.fillRect(
-          Math.min(this.#rectStartX, x) * this.#cellSide,
-          Math.min(this.#rectStartY, y) * this.#cellSide,
-          (1 + Math.abs(x - this.#rectStartX)) * this.#cellSide,
-          (1 + Math.abs(y - this.#rectStartY)) * this.#cellSide,
-        );
+        this.#renderer.previewRectangle(this.#rectStartX, this.#rectStartY, x, y);
       };
-    }
-  }
-
-  /**
-   * @param {number} x1
-   * @param {number} y1
-   * @param {number} x2
-   * @param {number} y2
-   */
-  #drawLine(x1, y1, x2, y2) {
-    let nDivs = 0;
-    let xDiff = Math.abs(x1 - x2);
-    let yDiff = Math.abs(y1 - y2);
-    let xSep = 1;
-    let ySep = 1;
-
-    if (xDiff > yDiff) {
-      nDivs = xDiff;
-      ySep = yDiff / nDivs;
-    } else {
-      nDivs = yDiff;
-      xSep = xDiff / nDivs;
-    }
-
-    if (x1 > x2) {
-      xSep *= -1;
-    }
-    if (y1 > y2) {
-      ySep *= -1;
-    }
-
-    if (nDivs > 0) {
-      for (let i = 0; i <= nDivs; i++) {
-        let nx = ~~(x1 + i * xSep);
-        let ny = ~~(y1 + i * ySep);
-        this.#drawPixel(nx, ny);
-      }
-    } else {
-      this.#drawPixel(x1, y1);
-    }
-  }
-
-  /**
-   * @param {number} x
-   * @param {number} y
-   */
-  #drawPixel(x, y) {
-    if (x < 0 || y < 0 || x >= NUM_ROWS_COLS || y >= NUM_ROWS_COLS) {
-      return;
-    }
-
-    const index = y * NUM_ROWS_COLS + x;
-    this.#drawing[index] = this.#paletteMgr.currColorIndex.toString(16);
-  }
-
-  /**
-   * @param {number} x1
-   * @param {number} y1
-   * @param {number} x3
-   * @param {number} y3
-   */
-  #drawRectangle(x1, y1, x3, y3) {
-    if (
-      x1 < 0 ||
-      y1 < 0 ||
-      x3 < 0 ||
-      y3 < 0 ||
-      x1 >= NUM_ROWS_COLS ||
-      y1 >= NUM_ROWS_COLS ||
-      x3 >= NUM_ROWS_COLS ||
-      y3 >= NUM_ROWS_COLS
-    ) {
-      return;
-    }
-
-    const minX = Math.min(x1, x3);
-    const minY = Math.min(y1, y3);
-    const maxX = Math.max(x1, x3);
-    const maxY = Math.max(y1, y3);
-
-    for (let x = minX; x <= maxX; x++) {
-      for (let y = minY; y <= maxY; y++) {
-        this.#drawPixel(x, y);
-      }
     }
   }
 
@@ -323,7 +223,7 @@ class DoodleManager {
       }
       const vx = visitingIndex % NUM_ROWS_COLS;
       const vy = ~~(visitingIndex / NUM_ROWS_COLS);
-      this.#drawPixel(vx, vy);
+      this.#renderer.drawPixel(vx, vy);
       this.#fillVisited[visitingIndex] = true;
       this.#pushValidAdjacentIndices(
         vx,

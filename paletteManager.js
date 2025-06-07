@@ -38,6 +38,10 @@ class PaletteManager {
     }
   }
 
+  getCurrentColorIndexHex() {
+    return this.currColorIndex.toString(16);
+  }
+
   getCurrentColor() {
     return this.#palette[this.currColorIndex];
   }

@@ -10,20 +10,23 @@ const Tools = {
 
 class ToolManager {
   #toolContainerElem;
+  #drawing; // TODO: Would I still need this?
+  #renderer;
+
   /** @type {Object[]} */
   #tools = [];
-  /** @type {string[]} */
-  #drawing;
   /** @type {number} */
   activeToolId;
 
   /**
    * @param {HTMLDivElement} toolContainerElem
    * @param {string[]} drawing
+   * @param {Renderer} renderer
    */
-  constructor(toolContainerElem, drawing) {
+  constructor(toolContainerElem, drawing, renderer) {
     this.#toolContainerElem = toolContainerElem;
     this.#drawing = drawing;
+    this.#renderer = renderer;
 
     this.#addToolElements();
     this.activeToolId = Tools.PENCIL;
@@ -45,11 +48,11 @@ class ToolManager {
    */
   handleToolSelect(toolId) {
     if (toolId === Tools.CLEAR) {
-      const clearTool = this.#tools.find((tool) => tool.toolId === toolId);
+      const clearTool = /** @type {ClearTool} */ (this.#tools.find((tool) => tool.toolId === toolId));
       if (!clearTool.useTool) {
-        throw new Error(`useTool not defined on ${clearTool.constructor.Name}`);
+        throw new Error(`useTool not defined on ${clearTool.constructor.name}`);
       }
-      clearTool.useTool(this.#drawing);
+      clearTool.useTool(this.#renderer);
     } else {
       this.activeToolId = toolId;
     }
@@ -115,13 +118,10 @@ class ClearTool {
     });
   }
 
-  // TODO: see if I can make this refactor-friendly
   /**
-   * @param {string[]} drawing
+   * @param {Renderer} renderer
    */
-  useTool(drawing) {
-    for (let i = 0; i < drawing.length; i++) {
-      drawing[i] = 'b';
-    }
+  useTool(renderer) {
+    renderer.clearDraw();
   }
 }
